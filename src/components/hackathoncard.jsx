@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import "./HackathonCard.css";
+import "./hackathonCard.css";
 import "./hackathon-status.css";
 
 const EVENT_STATUSES = [
