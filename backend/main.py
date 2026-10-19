@@ -200,11 +200,16 @@ from discovery_service import discover_candidates
 
 app.include_router(ai_importer_router)
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173", "http://localhost:5174",
-        "http://127.0.0.1:5173", "http://127.0.0.1:5174",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "https://hackmate-cdh2orm02-secondmoon.vercel.app",
+        "https://hackmate-flame.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
