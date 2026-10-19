@@ -4,8 +4,8 @@ import hackathons from "./assets/data/hackathons.js";
 import HackathonCard from "./components/hackathoncard.jsx";
 import "./App.css";
 
-const API_URL = "http://127.0.0.1:8000/api/hackathons";
-const ADMIN_URL = "http://127.0.0.1:8000/api/admin/discovery";
+const API_URL = "https://hackmate-uzrm.onrender.com/api/hackathons";
+const ADMIN_URL = "https://hackmate-uzrm.onrender.com/api/admin/discovery";
 
 const SKILLS = [
   "Python", "Java", "C / C++", "Web Development", "AI / Machine Learning",
