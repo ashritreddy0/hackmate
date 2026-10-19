@@ -1,0 +1,24 @@
+
+[
+  {
+    "id": "hacktober-hackdays",
+    "title": "Hacktober HackDays",
+    "organizer": "Hacktober",
+    "format": "Online",
+    "location": "Online",
+    "category": "Open Innovation",
+    "level": "Beginner",
+    "eligibility": "Check official event page",
+    "description": "A hackathon for participants to build and showcase projects.",
+    "platform": "Devpost",
+    "eventUrl": "https://example.com",
+    "platformUrl": "https://devpost.com",
+    "registrationUrl": "https://example.com",
+    "deadline": null,
+    "eventStart": null,
+    "eventEnd": null,
+    "verification": "Needs verification",
+    "verifiedOn": null,
+    "isSample": true
+  }
+]

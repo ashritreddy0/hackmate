@@ -1,0 +1,123 @@
+
+const hackathons = [
+  {
+    id: "hacktober-hackdays-2026",
+    title: "Hacktober HackDays",
+    organizer: "SheBuilds",
+    format: "Hybrid",
+    location: "Noida, India",
+    category: "Open Source",
+    level: "Beginner Friendly",
+    eligibility: "Students; check the official listing for complete rules",
+    description:
+      "An open-source building experience with mentorship and project development. The listing mentions a final event at PWIOI, Noida, on October 31, 2026.",
+    platform: "Unstop",
+    eventUrl:
+      "https://api.unstop.com/hackathons/hacktober-hackdays-shebuilds-1770977",
+    platformUrl: "https://unstop.com/hackathons/",
+    registrationUrl:
+      "https://api.unstop.com/hackathons/hacktober-hackdays-shebuilds-1770977",
+    deadline: "2026-10-23T13:00:00+05:30",
+    eventStart: "2026-10-31",
+    eventEnd: "2026-10-31",
+    verification: "directory-confirmed",
+    verifiedOn: "2026-10-18",
+    isSample: false,
+  },
+  {
+    id: "overclock-26",
+    title: "OverClock'26 — 24-Hour Hackathon",
+    organizer: "SRM Easwari Engineering College",
+    format: "In person",
+    location: "Chennai, Tamil Nadu, India",
+    category: "Software Development",
+    level: "All levels",
+    eligibility: "Students from any college or department; team of 1–4",
+    description:
+      "A 24-hour hackathon focused on building technology-driven solutions. The listing permits cross-college and cross-department teams.",
+    platform: "Unstop",
+    eventUrl:
+      "https://api.unstop.com/hackathons/overclock26-24-hours-hackathon-srm-easwari-engineering-college-srmeec-ramapuram-1766861",
+    platformUrl: "https://unstop.com/hackathons/",
+    registrationUrl:
+      "https://api.unstop.com/hackathons/overclock26-24-hours-hackathon-srm-easwari-engineering-college-srmeec-ramapuram-1766861",
+    deadline: "2026-10-29",
+    eventStart: "2026-10-30",
+    eventEnd: "2026-10-31",
+    verification: "directory-confirmed",
+    verifiedOn: "2026-10-18",
+    isSample: false,
+  },
+  {
+    id: "big-hack-2-2026",
+    title: "The Big Hack 2.0",
+    organizer: "Acharya Institute of Technology",
+    format: "In person",
+    location: "Bengaluru, Karnataka, India",
+    category: "Software Development",
+    level: "All levels",
+    eligibility: "Students; team of 2–4",
+    description:
+      "A team-based hackathon-style coding challenge. Confirm the event format, venue, and participation requirements on the listing before applying.",
+    platform: "Unstop",
+    eventUrl:
+      "https://api.unstop.com/hackathons/the-big-hack-20-acharya-institute-of-technology-1771496",
+    platformUrl: "https://unstop.com/hackathons/",
+    registrationUrl:
+      "https://api.unstop.com/hackathons/the-big-hack-20-acharya-institute-of-technology-1771496",
+    deadline: "2026-11-10T09:00:00+05:30",
+    eventStart: null,
+    eventEnd: null,
+    verification: "directory-confirmed",
+    verifiedOn: "2026-10-18",
+    isSample: false,
+  },
+  {
+    id: "paypal-ai-2026",
+    title: "PayPal AI Hackathon",
+    organizer: "PayPal and Devpost",
+    format: "Online",
+    location: "Global — online",
+    category: "AI / Machine Learning",
+    level: "All levels",
+    eligibility:
+      "Participants must meet the official age and country requirements",
+    description:
+      "Build an application that combines the PayPal developer platform with an AI tool, model, or platform. Review the official rules for country restrictions and submission requirements.",
+    platform: "Devpost",
+    eventUrl: "https://paypalaihackathon.devpost.com/",
+    platformUrl: "https://devpost.com/hackathons?challenge_type=online",
+    registrationUrl: "https://paypalaihackathon.devpost.com/",
+    deadline: "2026-11-12T12:00:00-08:00",
+    eventStart: "2026-10-01",
+    eventEnd: "2026-11-12",
+    verification: "official-source",
+    verifiedOn: "2026-10-18",
+    isSample: false,
+  },
+  {
+    id: "opencv-ai-competition-2026",
+    title: "OpenCV AI Competition 2026",
+    organizer: "OpenCV Foundation, powered by AWS",
+    format: "Online",
+    location: "Global — online",
+    category: "AI / Computer Vision",
+    level: "Intermediate",
+    eligibility:
+      "Global participation subject to the official rules and country exclusions",
+    description:
+      "Build a vision application using OpenCV 5 for substantive image or video analysis and run a meaningful component on AWS. Check the competition page for all requirements.",
+    platform: "Devpost",
+    eventUrl: "https://opencv26.devpost.com/",
+    platformUrl: "https://devpost.com/hackathons?challenge_type=online",
+    registrationUrl: "https://opencv26.devpost.com/",
+    deadline: "2026-10-26T23:45:00-07:00",
+    eventStart: "2026-08-12",
+    eventEnd: "2026-10-26",
+    verification: "official-source",
+    verifiedOn: "2026-10-18",
+    isSample: false,
+  },
+];
+
+export default hackathons;
