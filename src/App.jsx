@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import hackathons from "./assets/data/hackathons.js";
-import HackathonCard from "./components/HackathonCard";
+import HackathonCard from "./components/hackathoncard.jsx";
 import "./App.css";
 
 const API_URL = "http://127.0.0.1:8000/api/hackathons";
