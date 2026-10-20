@@ -311,8 +311,6 @@ export default function App() {
   const [showProfile, setShowProfile] = useState(true);
   const [recommendationsReady, setRecommendationsReady] = useState(false);
 
-  const [queue, setQueue] = useState([]);
-  const [reviewFilter, setReviewFilter] = useState("Pending review");
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminMessage, setAdminMessage] = useState("");
   const [adminError, setAdminError] = useState("");
@@ -330,12 +328,11 @@ export default function App() {
     setAdminError("");
     try {
       const response = await fetch(
-        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(reviewFilter)}&limit=100`,
+        `${ADMIN_URL}/queue?limit=1`,
         { headers: adminHeaders() }
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
-      setQueue(Array.isArray(data) ? data : []);
       setAdminAuthenticated(true);
       setAdminMessage("Admin login successful.");
     } catch (err) {
@@ -551,25 +548,7 @@ export default function App() {
     setShowProfile(false);
   }
 
-  async function loadQueue(status = reviewFilter) {
-    setAdminLoading(true);
-    setAdminError("");
-    try {
-      const response = await fetch(
-        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(status)}&limit=100`,
-        { headers: adminHeaders() }
-      );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
-      setQueue(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setAdminError(err.message);
-    } finally {
-      setAdminLoading(false);
-    }
-  }
-
-  async function scanEvents() {
+remove loadQueue  async function scanEvents() {
     setAdminLoading(true);
     setAdminError("");
     setAdminMessage("");
@@ -583,7 +562,7 @@ export default function App() {
         const latest = await eventsResponse.json();
         if (Array.isArray(latest)) setEvents(latest.map(normalize));
       }
-      setQueue([]);
+      
     } catch (err) {
       setAdminError(`Scan failed: ${err.message}`);
     } finally {
@@ -591,44 +570,7 @@ export default function App() {
     }
   }
 
-  async function reviewCandidate(candidate, action) {
-    const id = candidate.id ?? candidate.candidate_id;
-    setAdminLoading(true);
-    setAdminError("");
-    setAdminMessage("");
-    try {
-      const response = await fetch(
-        `${ADMIN_URL}/${encodeURIComponent(id)}/${action}`,
-        { method: "POST", headers: adminHeaders() }
-      );
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
-
-      setAdminMessage(
-        data.message || (action === "approve" ? "Candidate approved." : "Candidate rejected.")
-      );
-      await loadQueue(reviewFilter);
-
-      if (action === "approve") {
-        const eventsResponse = await fetch(API_URL);
-        if (eventsResponse.ok) {
-          const latest = await eventsResponse.json();
-          if (Array.isArray(latest)) setEvents(latest.map(normalize));
-        }
-      }
-    } catch (err) {
-      setAdminError(err.message);
-    } finally {
-      setAdminLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (activeTab === "Admin Discovery" && adminAuthenticated) loadQueue(reviewFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, reviewFilter]);
-
-  const tabs = ["Discover", "Saved", "My List"];
+remove manual review logic  const tabs = ["Discover", "Saved", "My List"];
 
   useEffect(() => {
     const handleLocationChange = () => setActiveTab(window.location.pathname === "/admin-portal" ? "Admin Discovery" : "Discover");
@@ -702,7 +644,7 @@ export default function App() {
             </form>
           ) : (
           <>
-          <button type="button" onClick={() => { setAdminAuthenticated(false); setAdminPassword(""); setAdminUsername(""); setAdminMessage(""); setQueue([]); openPublicApp("Discover"); }}>Log out</button>
+          <button type="button" onClick={() => { setAdminAuthenticated(false); setAdminPassword(""); setAdminUsername(""); setAdminMessage(""); openPublicApp("Discover"); }}>Log out</button>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "22px 0" }}>
             <button className="primary-button" onClick={scanEvents} disabled={adminLoading}>
               {adminLoading ? "Working…" : "🔎 Scan for hackathons"}
