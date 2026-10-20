@@ -210,6 +210,7 @@ app.add_middleware(
         "http://127.0.0.1:5174",
         "https://hackmate-cdh2orm02-secondmoon.vercel.app",
         "https://hackmate-flame.vercel.app",
+        "https://hackmate-pgvzekdnj-secondmoon.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
