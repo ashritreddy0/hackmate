@@ -7,10 +7,13 @@ from urllib.parse import urlparse, urlunparse
 import hashlib
 import ipaddress
 import socket
+import os
+import secrets
 
 import httpx
 from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from sqlalchemy import (
@@ -216,6 +219,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+security = HTTPBasic(auto_error=False)
+
+def require_admin(credentials: Optional[HTTPBasicCredentials] = Depends(security)):
+    expected_user = os.getenv("ADMIN_USERNAME", "")
+    expected_password = os.getenv("ADMIN_PASSWORD", "")
+    if not expected_user or not expected_password:
+        raise HTTPException(503, "Admin credentials are not configured on the server.")
+    username = credentials.username if credentials else ""
+    password = credentials.password if credentials else ""
+    if not (
+        secrets.compare_digest(username, expected_user)
+        and secrets.compare_digest(password, expected_password)
+    ):
+        raise HTTPException(
+            401,
+            "Admin login required or credentials are incorrect.",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return True
+
 
 ALLOWED_STATUSES = {
     "Open", "Needs verification", "Closed", "Cancelled"
@@ -447,7 +471,7 @@ async def extract_candidate(source_url: str, snippet: str) -> dict:
     }
 
 
-@app.post("/api/admin/discovery/scan")
+@app.post("/api/admin/discovery/scan", dependencies=[Depends(require_admin)])
 async def scan_for_hackathons(db: Session = Depends(get_db)):
     try:
         result = await discover_candidates()
@@ -512,6 +536,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
 @app.get(
     "/api/admin/discovery/queue",
     response_model=list[DiscoveryCandidateOutput],
+    dependencies=[Depends(require_admin)],
 )
 def get_discovery_queue(
     review_status: str = "Pending review",
@@ -527,7 +552,7 @@ def get_discovery_queue(
     ).all()
 
 
-@app.post("/api/admin/discovery/{candidate_id}/approve")
+@app.post("/api/admin/discovery/{candidate_id}/approve", dependencies=[Depends(require_admin)])
 async def approve_discovery_candidate(
     candidate_id: int, db: Session = Depends(get_db)
 ):
@@ -620,7 +645,7 @@ async def approve_discovery_candidate(
     }
 
 
-@app.post("/api/admin/discovery/{candidate_id}/reject")
+@app.post("/api/admin/discovery/{candidate_id}/reject", dependencies=[Depends(require_admin)])
 def reject_discovery_candidate(
     candidate_id: int, db: Session = Depends(get_db)
 ):
