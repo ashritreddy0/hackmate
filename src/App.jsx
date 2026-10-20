@@ -291,6 +291,8 @@ export default function App() {
   const searchInputRef = useRef(null);
   const [category, setCategory] = useState("All");
   const [formatFilter, setFormatFilter] = useState("All");
+  const [locationScope, setLocationScope] = useState("All India");
+  const [city, setCity] = useState(() => readStorage("hackmate-city", ""));
   const [sortBy, setSortBy] = useState("deadline");
 
   const [saved, setSaved] = useState(() => readStorage("hackmate-saved", []));
@@ -383,6 +385,7 @@ export default function App() {
   useEffect(() => saveStorage("hackmate-event-statuses", statuses), [statuses]);
   useEffect(() => saveStorage("hackmate-event-edits", edits), [edits]);
   useEffect(() => saveStorage("hackmate-profile", profile), [profile]);
+  useEffect(() => saveStorage("hackmate-city", city), [city]);
   useEffect(() => {
     function handleShortcut(event) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
@@ -441,6 +444,14 @@ export default function App() {
       if (category !== "All" && event.category !== category) return false;
       if (formatFilter !== "All" && event.format !== formatFilter) return false;
 
+      const eventFormat = String(event.format || "").toLowerCase();
+      const eventLocation = String(event.location || "").toLowerCase();
+      if (locationScope === "Online" && !/online|virtual|remote|hybrid/i.test(eventFormat)) return false;
+      if (locationScope === "Near my city") {
+        const cityName = city.trim().toLowerCase();
+        if (!cityName || !eventLocation.includes(cityName) || /online|virtual|remote/i.test(eventFormat)) return false;
+      }
+
       const searchable = [
         event.title, event.organizer, event.location, event.category,
         event.description, event.platform,
@@ -461,7 +472,7 @@ export default function App() {
     });
 
     return result;
-  }, [mergedEvents, activeTab, saved, tracked, category, formatFilter, search, sortBy]);
+  }, [mergedEvents, activeTab, saved, tracked, category, formatFilter, locationScope, city, search, sortBy]);
 
   function toggleList(setter, id) {
     setter((current) =>
@@ -566,8 +577,13 @@ export default function App() {
       const response = await fetch(`${ADMIN_URL}/scan`, { method: "POST", headers: adminHeaders() });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
-      setAdminMessage(data.message || "Scan completed.");
-      await loadQueue(reviewFilter);
+      setAdminMessage(data.message || `Scan completed: ${data.published_now || 0} new listings published.`);
+      const eventsResponse = await fetch(API_URL);
+      if (eventsResponse.ok) {
+        const latest = await eventsResponse.json();
+        if (Array.isArray(latest)) setEvents(latest.map(normalize));
+      }
+      setQueue([]);
     } catch (err) {
       setAdminError(`Scan failed: ${err.message}`);
     } finally {
@@ -670,8 +686,8 @@ export default function App() {
       {activeTab === "Admin Discovery" ? (
         <main className="admin-discovery">
           <span className="eyebrow">ADMIN TOOLS</span>
-          <h1>Hackathon Discovery Queue</h1>
-          <p>Review potential events before adding them to HackMate.</p>
+          <h1>HackMate Auto Discovery</h1>
+          <p>HackMate automatically publishes AI-screened discoveries. You do not need to approve listings; use the public site to edit incorrect details.</p>
 
           {!adminAuthenticated ? (
             <form onSubmit={loginAdmin} style={{ maxWidth: 420, display: "grid", gap: 12, margin: "24px 0" }}>
@@ -692,44 +708,21 @@ export default function App() {
               {adminLoading ? "Working…" : "🔎 Scan for hackathons"}
             </button>
 
-            <select value={reviewFilter} onChange={(e) => setReviewFilter(e.target.value)}>
-              <option>Pending review</option>
-              <option>Approved</option>
-              <option>Rejected</option>
-            </select>
-
-            <button onClick={() => loadQueue()} disabled={adminLoading}>Refresh queue</button>
+            <button onClick={async () => { setAdminLoading(true); try { const response = await fetch(API_URL); if (!response.ok) throw new Error(`HTTP ${response.status}`); const data = await response.json(); if (Array.isArray(data)) setEvents(data.map(normalize)); setAdminMessage("Listings refreshed."); } catch (err) { setAdminError(err.message); } finally { setAdminLoading(false); } }} disabled={adminLoading}>Refresh listings</button>
           </div>
 
           {adminMessage && <p role="status">{adminMessage}</p>}
           {adminError && <p role="alert" style={{ color: "#b42318" }}>{adminError}</p>}
 
-          {queue.map((candidate) => (
-            <article key={candidate.id ?? candidate.candidate_id ?? candidate.url}
-              style={{ padding: 20, margin: "16px 0", border: "1px solid #e0e5ef", borderRadius: 14, background: "#fff" }}>
-              <h3>{candidate.title || "Untitled candidate"}</h3>
-              <a href={candidate.url || candidate.source_url} target="_blank" rel="noreferrer">
-                {candidate.url || candidate.source_url}
-              </a>
-              <p>{candidate.snippet}</p>
-              <p>Review status: {candidate.review_status || reviewFilter}</p>
-
-              {reviewFilter === "Pending review" && (
-                <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                  <button disabled={adminLoading} onClick={() => reviewCandidate(candidate, "approve")}>
-                    Approve &amp; add
-                  </button>
-                  <button disabled={adminLoading} onClick={() => reviewCandidate(candidate, "reject")}>
-                    Reject
-                  </button>
-                </div>
-              )}
-            </article>
-          ))}
-
-          {!adminLoading && queue.length === 0 && <p>No candidates in this queue yet.</p>}
+          <div style={{ padding: 20, margin: "16px 0", border: "1px solid #e0e5ef", borderRadius: 14 }}>
+            <h3>Automatic publishing is enabled</h3>
+            <p>New discoveries are added to the public listings without approval. AI can make mistakes, so listings remain marked for verification.</p>
+            <p><strong>Current database listings:</strong> {events.length}</p>
+            <p>Scheduled scans run about every 6 hours while the backend is awake. On the free hosting plan, scans pause while the service sleeps and resume after it wakes.</p>
+            <a href="/" onClick={(event) => { event.preventDefault(); openPublicApp("Discover"); }}>Open public listings to edit details →</a>
+          </div>
           <p style={{ fontSize: 12, color: "#667085" }}>
-            Search results are leads, not a guarantee of every event in India. Verify dates, registration links and eligibility before publishing.
+            Discovery searches multiple public sources and Indian city queries. It cannot guarantee every event or that every deadline is current.
           </p>
           </>
           )}
@@ -1003,6 +996,21 @@ export default function App() {
               </div>
             </div>
 
+            <div className="filter-group">
+              <span className="filter-label">Location</span>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                <select aria-label="Location filter" value={locationScope} onChange={(e) => setLocationScope(e.target.value)} style={{ padding: 11, minWidth: 190 }}>
+                  <option>All India</option>
+                  <option>Online</option>
+                  <option>Near my city</option>
+                </select>
+                {locationScope === "Near my city" && (
+                  <input aria-label="Your city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Enter your city (e.g. Vijayawada)" style={{ padding: 11, minWidth: 230 }} />
+                )}
+              </div>
+              {locationScope === "Near my city" && !city.trim() && <p style={{ color: "#667085", fontSize: 13 }}>Enter your city to filter in-person opportunities. Your location is not collected automatically.</p>}
+            </div>
+
             <div className="results-heading">
               <span><strong>{visibleEvents.length}</strong> listings found</span>
               <label className="sort-control">Sort by
@@ -1038,6 +1046,8 @@ export default function App() {
                   setSearch("");
                   setCategory("All");
                   setFormatFilter("All");
+                  setLocationScope("All India");
+                  setCity("");
                 }}>Clear filters</button>
               </div>
             )}
