@@ -1063,3 +1063,72 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   body::after, .app-shell::before { display: none !important; }
 }
+
+
+/* Homepage trust strip and keyboard-friendly discovery */
+.value-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 1216px;
+  margin: -9px auto 34px;
+  padding: 0 32px;
+}
+.value-strip-stat {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  padding: 17px 19px;
+  border: 1px solid #eae8f5;
+  border-radius: 15px;
+  background: rgba(255,255,255,.76);
+  box-shadow: 0 5px 20px rgba(39,31,91,.025);
+}
+.value-strip-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 39px;
+  width: 39px;
+  height: 39px;
+  border-radius: 12px;
+  color: #6654e6;
+  background: #f0edff;
+  font-size: 20px;
+}
+.value-strip-stat div { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+.value-strip-stat strong { color: #262143; font-size: 15px; font-weight: 800; letter-spacing: -.3px; }
+.value-strip-stat span:not(.value-strip-icon) { color: #77748e; font-size: 11px; line-height: 1.5; }
+.search-box { position: relative; }
+.search-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  padding: 4px 7px;
+  border: 1px solid #e7e4f1;
+  border-radius: 6px;
+  background: #faf9ff;
+  color: #8985a1;
+  font: 600 10px/1.4 "DM Sans", sans-serif;
+  white-space: nowrap;
+}
+.clear-filters-link {
+  margin-top: 14px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #6552df;
+  font-size: 12px;
+  font-weight: 700;
+}
+.clear-filters-link:hover { text-decoration: underline; }
+.results-heading strong { color: #5f4be0; }
+@media (max-width: 800px) {
+  .value-strip { grid-template-columns: 1fr; gap: 8px; margin: 0 auto 25px; padding: 0 24px; }
+  .value-strip-stat { padding: 13px 15px; }
+}
+@media (max-width: 480px) {
+  .value-strip { padding: 0 17px; }
+  .search-shortcut { display: none; }
+}
