@@ -1980,3 +1980,57 @@ html, body { background: #f1f1f4 !important; }
 @media (prefers-reduced-motion: reduce) {
   .orbit-auto-spin { animation: none !important; }
 }
+
+
+/* Contrast repair: personalization form must remain readable in dark mode. */
+.personalization { color: #25213a; }
+.personalization h2,
+.personalization h3,
+.personalization label,
+.personalization legend { color: #25213a; }
+.personalization p,
+.personalization .form-description { color: #626579; }
+.personalization button,
+.personalization input,
+.personalization select,
+.personalization textarea { color: #25213a; }
+:root[data-theme="dark"] .personalization {
+  color: #f3f0ff !important;
+  background: #191922 !important;
+  border-color: #38364b !important;
+}
+:root[data-theme="dark"] .personalization h2,
+:root[data-theme="dark"] .personalization h3,
+:root[data-theme="dark"] .personalization label,
+:root[data-theme="dark"] .personalization legend,
+:root[data-theme="dark"] .personalization strong {
+  color: #f4f1ff !important;
+}
+:root[data-theme="dark"] .personalization p,
+:root[data-theme="dark"] .personalization .form-description {
+  color: #b9b6cb !important;
+}
+:root[data-theme="dark"] .personalization button,
+:root[data-theme="dark"] .personalization input,
+:root[data-theme="dark"] .personalization select,
+:root[data-theme="dark"] .personalization textarea {
+  color: #f2efff !important;
+}
+:root[data-theme="dark"] .personalization button:not(.selected):not([aria-pressed="true"]) {
+  background: #211f30;
+  border-color: #46415e;
+}
+:root[data-theme="dark"] .personalization button.selected,
+:root[data-theme="dark"] .personalization button[aria-pressed="true"] {
+  color: #fff !important;
+  background: #6248e8 !important;
+  border-color: #9885ff !important;
+}
+:root[data-theme="dark"] .personalization input::placeholder,
+:root[data-theme="dark"] .personalization textarea::placeholder {
+  color: #9995ad !important;
+}
+:root[data-theme="dark"] .personalization :focus-visible {
+  outline: 2px solid #a99aff;
+  outline-offset: 3px;
+}
