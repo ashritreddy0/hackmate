@@ -483,6 +483,11 @@ async def extract_candidate(source_url: str, snippet: str) -> dict:
 
 @app.post("/api/admin/discovery/scan", dependencies=[Depends(require_admin)])
 async def scan_for_hackathons(db: Session = Depends(get_db)):
+    """
+    Discover and publish AI-screened hackathon leads automatically.
+    Listings are visible immediately but marked Needs verification so the
+    admin can correct any inaccurate details later. No approval queue gate.
+    """
     try:
         result = await discover_candidates()
     except Exception as exc:
@@ -490,60 +495,103 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
 
     added = 0
     duplicates = 0
+    failed_imports = 0
+    published = []
 
-    # Load existing URLs once. Previously these tables were queried again for
-    # every search result, making scans slower as the database grew.
-    existing_candidate_urls = {
-        canonical_url(candidate.source_url)
-        for candidate in db.scalars(select(DiscoveryCandidate)).all()
-    }
+    existing_events = db.scalars(select(Hackathon)).all()
     existing_event_urls = {
         canonical_url(url)
-        for event in db.scalars(select(Hackathon)).all()
+        for event in existing_events
         for url in (event.event_url, event.registration_url, event.platform_url)
         if url
     }
+    existing_event_ids = {event.event_id for event in existing_events}
 
-    try:
-        for item in result.get("candidates", []):
-            source_url = str(item.get("source_url") or "").strip()
-            title = str(item.get("title") or "").strip()
-            if not source_url or not title:
-                continue
+    for item in result.get("candidates", []):
+        source_url = str(item.get("source_url") or "").strip()
+        search_title = str(item.get("title") or "").strip()
+        snippet = str(item.get("snippet") or "")
+        if not source_url or not search_title:
+            continue
 
-            normalized = canonical_url(source_url)
-            if normalized in existing_candidate_urls or normalized in existing_event_urls:
-                duplicates += 1
-                continue
+        normalized = canonical_url(source_url)
+        if normalized in existing_event_urls:
+            duplicates += 1
+            continue
 
-            domain = item.get("source_domain") or urlparse(source_url).hostname or ""
-            db.add(DiscoveryCandidate(
-                title=title[:250],
-                source_url=source_url,
-                source_domain=domain[:250],
-                snippet=str(item.get("snippet") or "")[:5000],
-                review_status="Pending review",
-                review_note="AI extraction and official details will be checked on approval.",
-            ))
-            existing_candidate_urls.add(normalized)
-            added += 1
+        try:
+            details = await extract_candidate(source_url, snippet)
+        except Exception as exc:
+            # Search results have already passed AI screening. Keep useful leads
+            # visible even if an event page blocks automated extraction.
+            failed_imports += 1
+            details = {
+                "title": search_title[:250],
+                "organizer": "Needs verification",
+                "format": "Unknown",
+                "location": "Unknown",
+                "category": "General",
+                "level": "All levels",
+                "eligibility": "Check the official rules",
+                "description": (
+                    f"{snippet}\n\nDetails could not be extracted automatically "
+                    f"({type(exc).__name__}). Please check the official source."
+                )[:8000],
+                "platform": urlparse(source_url).hostname or "Unknown",
+                "event_url": source_url,
+                "platform_url": source_url,
+                "registration_url": None,
+                "deadline": None,
+                "event_start": None,
+                "event_end": None,
+            }
 
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(500, f"Could not save scan results: {type(exc).__name__}") from exc
+        event_id = "discovery-" + hashlib.sha256(
+            normalized.encode("utf-8")
+        ).hexdigest()[:24]
+        if event_id in existing_event_ids:
+            duplicates += 1
+            continue
+
+        today = date.today()
+        deadline = details.get("deadline")
+        status = "Closed" if deadline and deadline < today else "Needs verification"
+        event = Hackathon(
+            event_id=event_id,
+            **details,
+            verification="Needs verification",
+            verified_on=None,
+            is_sample=False,
+            status=status,
+        )
+        db.add(event)
+        try:
+            db.commit()
+            db.refresh(event)
+        except Exception as exc:
+            db.rollback()
+            failed_imports += 1
+            continue
+
+        existing_event_ids.add(event_id)
+        for url in (event.event_url, event.registration_url, event.platform_url):
+            if url:
+                existing_event_urls.add(canonical_url(url))
+        added += 1
+        published.append({"title": event.title, "status": event.status})
 
     return {
-        "message": "Discovery scan completed. Candidates require review.",
+        "message": "Discovery completed. AI-screened hackathons are published automatically; details are marked for verification so you can edit mistakes later.",
         "searched_on": result.get("searched_on"),
         "queries_run": result.get("search_queries", 0),
         "search_failures": result.get("failed_queries", 0),
         "candidates_found": result.get("candidate_count", 0),
-        "new_candidates_saved": added,
+        "published_now": added,
         "duplicates_skipped": duplicates,
-        "review_required": True,
+        "import_failures": failed_imports,
+        "review_required": False,
+        "published": published,
     }
-
 
 @app.get(
     "/api/admin/discovery/queue",
