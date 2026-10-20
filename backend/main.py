@@ -403,8 +403,18 @@ async def extract_candidate(source_url: str, snippet: str) -> dict:
         raise HTTPException(502, "AI did not return hackathon details.")
 
     title = str(data.get("title") or "").strip()
+    parsed_source = urlparse(source_url)
+    host = (parsed_source.hostname or "").lower().removeprefix("www.")
+    path = parsed_source.path.strip("/").lower()
+    # Broad platform homepages/directories are not individual hackathon events.
+    generic_platform_hosts = {
+        "mlh.io", "devpost.com", "unstop.com", "devfolio.co",
+        "hackerearth.com", "hack2skill.com", "hackathon.com",
+    }
+    if host in generic_platform_hosts and (not path or path in {"hackathons", "events", "competitions"}):
+        raise HTTPException(422, "This is a general platform or directory, not one specific hackathon. Reject it and scan for individual event pages.")
     if len(title) < 4:
-        raise HTTPException(422, "AI could not confirm a meaningful event title.")
+        raise HTTPException(422, "The page did not provide a usable hackathon title. It remains pending; reject this result or verify the event page manually.")
 
     def text_field(key, fallback, limit=2000):
         value = data.get(key)
