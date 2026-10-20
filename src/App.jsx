@@ -202,6 +202,9 @@ export default function App() {
     { tag: "BRAIN HACK 04 · SOCIAL PROOF, BUT USEFUL", title: "Find your people. — Borrow their momentum.", line: "A teammate can turn “someday” into a calendar invite. You don’t need a huge network; one curious person is enough.", prompt: "Message one person: “Want to build something this weekend?”", action: "FIND A TEAM", icon: "⌘" },
     { tag: "BRAIN HACK 05 · THE FRESH-START EFFECT", title: "You can start — before you feel ready.", line: "Motivation often shows up after you begin, not before. Give yourself a tiny 10-minute start and stop when the timer ends if you want.", prompt: "Open a blank file. Give it ten minutes.", action: "BEGIN ANYWAY", icon: "⚡" },
   ];
+  const [cursorMode, setCursorMode] = useState(() => {
+    try { return localStorage.getItem("hackmate-cursor-mode") || "ambient"; } catch { return "ambient"; }
+  });
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem("hackmate-theme");
@@ -214,6 +217,11 @@ export default function App() {
     const timer = window.setInterval(() => setSignalSeed((seed) => (seed + 1) % 5), 6500);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.cursorMode = cursorMode;
+    try { localStorage.setItem("hackmate-cursor-mode", cursorMode); } catch {}
+  }, [cursorMode]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -240,25 +248,37 @@ export default function App() {
         root.style.setProperty("--cursor-y", `${event.clientY}px`);
         const onElement = Boolean(event.target?.closest?.(interactiveSelector));
         root.dataset.pointerOnElement = String(onElement);
-        root.dataset.backgroundGlow = onElement ? "false" : "true";
+        root.dataset.backgroundGlow = !onElement && cursorMode !== "off" ? "true" : "false";
       });
+    };
+    const onPointerDown = (event) => {
+      if (event.target?.closest?.(interactiveSelector) || cursorMode !== "interactive") return;
+      root.style.setProperty("--ripple-x", `${event.clientX}px`);
+      root.style.setProperty("--ripple-y", `${event.clientY}px`);
+      root.dataset.ripple = "false";
+      requestAnimationFrame(() => { root.dataset.ripple = "true"; });
     };
     const clearPointer = () => {
       root.dataset.backgroundGlow = "false";
       root.dataset.pointerOnElement = "false";
     };
     window.addEventListener("pointermove", updatePointer, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.addEventListener("pointerleave", clearPointer);
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", updatePointer);
+      window.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("pointerleave", clearPointer);
       delete root.dataset.backgroundGlow;
       delete root.dataset.pointerOnElement;
+      delete root.dataset.ripple;
+      root.style.removeProperty("--ripple-x");
+      root.style.removeProperty("--ripple-y");
       root.style.removeProperty("--cursor-x");
       root.style.removeProperty("--cursor-y");
     };
-  }, []);
+  }, [cursorMode]);
 
   const [activeTab, setActiveTab] = useState("Discover");
   const [events, setEvents] = useState(hackathons.map(normalize));
@@ -581,6 +601,14 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <label className="cursor-mode-control" title="Choose how the background responds to your cursor">
+          <span aria-hidden="true">✳</span>
+          <select aria-label="Background interaction" value={cursorMode} onChange={(event) => setCursorMode(event.target.value)}>
+            <option value="off">Glow off</option>
+            <option value="ambient">Ambient</option>
+            <option value="interactive">Play mode</option>
+          </select>
+        </label>
         <button
           type="button"
           className="theme-toggle"
