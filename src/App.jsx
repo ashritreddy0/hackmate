@@ -58,6 +58,17 @@ function saveStorage(key, value) {
   }
 }
 
+// Bound network requests so a sleeping or unresponsive API cannot lock the UI.
+async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 function dateValue(value) {
   if (!value) return null;
   const result = new Date(value);
@@ -354,7 +365,7 @@ export default function App() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(API_URL);
+        const response = await fetchWithTimeout(API_URL, {}, 15000);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -364,7 +375,7 @@ export default function App() {
       } catch (err) {
         if (!cancelled) {
           setEvents([]);
-          setError(`Could not load hackathons from the backend: ${err.message}`);
+          setError(`Could not load hackathons from the backend: ${err.name === "AbortError" ? "the server took too long to respond. You can still try Refresh hackathons." : err.message}`);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -551,11 +562,11 @@ async function refreshDiscoveries() {
     setRefreshMessage("");
     setRefreshError("");
     try {
-      const scanResponse = await fetch(PUBLIC_REFRESH_URL, { method: "POST" });
+      const scanResponse = await fetchWithTimeout(PUBLIC_REFRESH_URL, { method: "POST" }, 90000);
       const scanData = await scanResponse.json().catch(() => ({}));
       if (!scanResponse.ok) throw new Error(scanData.detail || `HTTP ${scanResponse.status}`);
 
-      const eventsResponse = await fetch(`${API_URL}?refresh=${Date.now()}`, { cache: "no-store" });
+      const eventsResponse = await fetchWithTimeout(`${API_URL}?refresh=${Date.now()}`, { cache: "no-store" }, 20000);
       if (!eventsResponse.ok) throw new Error(`Listings reload failed: HTTP ${eventsResponse.status}`);
       const latest = await eventsResponse.json();
       if (!Array.isArray(latest)) throw new Error("Unexpected listings response");
@@ -566,7 +577,7 @@ async function refreshDiscoveries() {
           : `Refresh complete. No new listings this time; your ${latest.length} saved listings are still here.`
       );
     } catch (err) {
-      setRefreshError(err.message || "Could not refresh hackathons.");
+      setRefreshError(err.message || "Could not refresh hackathons. Please try again in a moment.");
     } finally {
       setRefreshLoading(false);
     }
@@ -930,7 +941,7 @@ const tabs = ["Discover", "Saved", "My List"];
                 </h2>
                 <p>Search events and manage your opportunities.</p>
               </div>
-              <button type="button" className="refresh-hackathons-button" onClick={refreshDiscoveries} disabled={refreshLoading || loading}>
+              <button type="button" className="refresh-hackathons-button" onClick={refreshDiscoveries} disabled={refreshLoading}>
                 <span aria-hidden="true">{refreshLoading ? "◌" : "↻"}</span>
                 {refreshLoading ? "Searching for new events…" : "Refresh hackathons"}
               </button>
