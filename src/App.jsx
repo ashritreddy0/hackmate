@@ -804,11 +804,12 @@ export default function App() {
               </div>
             </div>
 
-            <label className="search-box">
-              <span>⌕</span>
-              <input type="search" placeholder="Search events, skills, locations, or organizers..."
+            <label className="search-box" htmlFor="hackathon-search">
+              <span aria-hidden="true">⌕</span>
+              <input ref={searchInputRef} id="hackathon-search" type="search" aria-label="Search hackathons" placeholder="Search events, skills, locations, or organizers..."
                 value={search} onChange={(e) => setSearch(e.target.value)} />
-              {search && <button type="button" className="clear-search" onClick={() => setSearch("")}>×</button>}
+              {!search && <kbd className="search-shortcut" aria-hidden="true">Ctrl K</kbd>}
+              {search && <button type="button" className="clear-search" aria-label="Clear search" onClick={() => setSearch("")}>×</button>}
             </label>
 
             <div className="filter-group">
