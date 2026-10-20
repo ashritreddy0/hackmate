@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin-portal
+Sitemap: https://hackmate-flame.vercel.app/sitemap.xml
