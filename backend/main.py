@@ -10,6 +10,7 @@ import ipaddress
 import socket
 import os
 import secrets
+import time
 
 import httpx
 from bs4 import BeautifulSoup
@@ -522,6 +523,31 @@ async def extract_candidate(source_url: str, snippet: str) -> dict:
         "event_start": event_start,
         "event_end": event_end,
     }
+
+
+# Public refresh is deliberately rate-limited so a visitor cannot repeatedly
+# trigger dozens of web searches. Saved events stay in the database between scans.
+_public_refresh_lock = asyncio.Lock()
+_public_refresh_last_at = 0.0
+_PUBLIC_REFRESH_COOLDOWN_SECONDS = 600
+
+
+@app.post("/api/discovery/refresh")
+async def public_discovery_refresh(db: Session = Depends(get_db)):
+    global _public_refresh_last_at
+    if _public_refresh_lock.locked():
+        raise HTTPException(429, "A HackMate refresh is already running. Please wait a moment.")
+    async with _public_refresh_lock:
+        remaining = _PUBLIC_REFRESH_COOLDOWN_SECONDS - (time.monotonic() - _public_refresh_last_at)
+        if remaining > 0:
+            wait_minutes = max(1, int((remaining + 59) // 60))
+            raise HTTPException(
+                429,
+                f"HackMate was refreshed recently. Please try again in about {wait_minutes} minute(s).",
+            )
+        _public_refresh_last_at = time.monotonic()
+        return await scan_for_hackathons(db)
+
 
 
 @app.post("/api/admin/discovery/scan", dependencies=[Depends(require_admin)])
