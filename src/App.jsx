@@ -630,9 +630,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="HackMate home" onClick={() => setActiveTab("Discover")}>
+        <a className="brand" href="#top" aria-label="Hackbooter home" onClick={() => setActiveTab("Discover")}>
           <span className="brand-icon">H</span>
-          <span>HackMate</span>
+          <span>Hackbooter</span>
         </a>
 
         <nav className="main-nav" aria-label="Main navigation">
@@ -671,7 +671,7 @@ export default function App() {
         <main className="admin-discovery">
           <span className="eyebrow">ADMIN TOOLS</span>
           <h1>Hackathon Discovery Queue</h1>
-          <p>Review potential events before adding them to HackMate.</p>
+          <p>Review potential events before adding them to Hackbooter.</p>
 
           {!adminAuthenticated ? (
             <form onSubmit={loginAdmin} style={{ maxWidth: 420, display: "grid", gap: 12, margin: "24px 0" }}>
@@ -750,7 +750,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="value-strip" aria-label="Why use HackMate">
+          <section className="value-strip" aria-label="Why use Hackbooter">
             <div className="value-strip-stat">
               <span className="value-strip-icon">✦</span>
               <div><strong>{mergedEvents.length}</strong><span>opportunities to explore</span></div>
@@ -765,7 +765,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="hackmate-signal" aria-label="HackMate rotating builder mindset">
+          <section className="hackmate-signal" aria-label="Hackbooter rotating builder mindset">
             <div className="mindset-topbar">
               <span><i className="mindset-status-dot" /> HACKMATE FIELD NOTES</span>
               <span>SMALL PSYCHOLOGY. REAL PROGRESS.</span>
@@ -812,7 +812,7 @@ export default function App() {
               <span className="eyebrow">PERSONALIZED FOR YOU</span>
               <h2 style={{ margin: "8px 0" }}>Find hackathons made for you</h2>
               <p style={{ color: "#667085", marginTop: 0 }}>
-                Tell us what you know and what you want to achieve. HackMate will rank suitable events from its database.
+                Tell us what you know and what you want to achieve. Hackbooter will rank suitable events from its database.
               </p>
 
               {showProfile ? (
@@ -1048,10 +1048,10 @@ export default function App() {
       <footer className="footer">
         <a className="brand footer-brand" href="#top">
           <span className="brand-icon">H</span>
-          <span>HackMate</span>
+          <span>Hackbooter</span>
         </a>
         <p>Made for the next generation of builders.</p>
-        <span>HackMate · Always verify event details</span>
+        <span>Hackbooter · Always verify event details</span>
       </footer>
     </div>
   );
