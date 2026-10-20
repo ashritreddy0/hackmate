@@ -1,6 +1,7 @@
 
 import asyncio
 import re
+import xml.etree.ElementTree as ET
 from datetime import date
 from urllib.parse import parse_qs, quote_plus, unquote, urlparse
 
@@ -139,7 +140,11 @@ async def search_one_query(
     client: httpx.AsyncClient,
     query: str,
 ) -> list[dict]:
-    """Collect candidate event pages from one search query."""
+    """Search two independent public result feeds and merge valid event leads."""
+    results = []
+    errors = []
+
+    # Provider 1: DuckDuckGo HTML results.
     try:
         response = await client.get(
             SEARCH_URL,
@@ -152,63 +157,66 @@ async def search_one_query(
             },
         )
         response.raise_for_status()
-    except httpx.HTTPError as exc:
-        raise RuntimeError(f"Search request failed for query {query!r}: {exc}") from exc
-
-    body_lower = response.text.lower()
-    # DuckDuckGo can return a successful HTTP response containing an anti-bot
-    # page instead of results. Count that as a failed query, not a false zero.
-    challenge_markers = (
-        "anomaly-modal", "bots use duckduckgo", "select all squares",
-        "captcha", "unfortunately, bots",
-    )
-    if any(marker in body_lower for marker in challenge_markers):
-        raise RuntimeError(f"Search provider returned an anti-bot challenge for query {query!r}")
-
-    soup = BeautifulSoup(response.text, "html.parser")
-    results = []
-
-    for result in soup.select(".result, .web-result, [data-testid='result'], article"):
-        link = (
-            result.select_one(".result__a")
-            or result.select_one("a[data-testid='result-title-a']")
-            or result.select_one("a[href]")
+        body_lower = response.text.lower()
+        challenge_markers = (
+            "anomaly-modal", "bots use duckduckgo", "select all squares",
+            "captcha", "unfortunately, bots",
         )
-        snippet_node = (
-            result.select_one(".result__snippet")
-            or result.select_one("[data-testid='result-snippet']")
-            or result.select_one(".snippet")
-            or result.select_one("p")
+        if any(marker in body_lower for marker in challenge_markers):
+            raise RuntimeError("DuckDuckGo returned an anti-bot challenge")
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        for result in soup.select(".result, .web-result, [data-testid='result'], article"):
+            link = (
+                result.select_one(".result__a")
+                or result.select_one("a[data-testid='result-title-a']")
+                or result.select_one("a[href]")
+            )
+            snippet_node = (
+                result.select_one(".result__snippet")
+                or result.select_one("[data-testid='result-snippet']")
+                or result.select_one(".snippet")
+                or result.select_one("p")
+            )
+            if not link:
+                continue
+            title = link.get_text(" ", strip=True)
+            url = clean_url(link.get("href", ""))
+            snippet = snippet_node.get_text(" ", strip=True) if snippet_node else ""
+            if url and is_relevant_domain(url) and looks_like_hackathon(title, url, snippet):
+                results.append({
+                    "title": title, "source_url": url, "snippet": snippet,
+                    "source_domain": urlparse(url).hostname,
+                    "status": "Needs verification", "review_required": True,
+                })
+    except (httpx.HTTPError, RuntimeError, ValueError) as exc:
+        errors.append(f"DuckDuckGo: {exc}")
+
+    # Provider 2: Bing RSS is a separate result format and often works when
+    # HTML search pages are challenged. It is a fallback, not a guarantee.
+    try:
+        response = await client.get(
+            "https://www.bing.com/search",
+            params={"format": "rss", "q": query},
+            headers={"User-Agent": "Mozilla/5.0 (compatible; HackMateBot/1.0)"},
         )
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
+        for item in root.findall(".//item"):
+            title = (item.findtext("title") or "").strip()
+            url = clean_url((item.findtext("link") or "").strip())
+            snippet = BeautifulSoup(item.findtext("description") or "", "html.parser").get_text(" ", strip=True)
+            if url and is_relevant_domain(url) and looks_like_hackathon(title, url, snippet):
+                results.append({
+                    "title": title, "source_url": url, "snippet": snippet,
+                    "source_domain": urlparse(url).hostname,
+                    "status": "Needs verification", "review_required": True,
+                })
+    except (httpx.HTTPError, ET.ParseError, RuntimeError, ValueError) as exc:
+        errors.append(f"Bing RSS: {exc}")
 
-        if not link:
-            continue
-
-        title = link.get_text(" ", strip=True)
-        url = clean_url(link.get("href", ""))
-        snippet = (
-            snippet_node.get_text(" ", strip=True)
-            if snippet_node
-            else ""
-        )
-
-        if not url or not is_relevant_domain(url):
-            continue
-
-        if not looks_like_hackathon(title, url, snippet):
-            continue
-
-        results.append(
-            {
-                "title": title,
-                "source_url": url,
-                "snippet": snippet,
-                "source_domain": urlparse(url).hostname,
-                "status": "Needs verification",
-                "review_required": True,
-            }
-        )
-
+    if not results and len(errors) == 2:
+        raise RuntimeError("All search providers failed: " + " | ".join(errors))
     return results
 
 
@@ -266,8 +274,7 @@ async def discover_candidates() -> dict:
     # failed (e.g. an anti-bot challenge or network outage).
     if failed_queries == len(SEARCH_QUERIES):
         raise RuntimeError(
-            "All discovery searches failed. The search provider may be blocking "
-            "automated requests; try again later or configure a supported search API."
+            "All discovery queries failed across DuckDuckGo and Bing RSS. Check outbound network access or configure a supported search API."
         )
 
     # Known event platforms are useful leads, but other legitimate
