@@ -552,6 +552,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
 )
 def get_discovery_queue(
     review_status: str = "Pending review",
+    limit: int = 100,
     db: Session = Depends(get_db),
 ):
     if review_status not in ALLOWED_REVIEW_STATUSES:
@@ -561,6 +562,7 @@ def get_discovery_queue(
         select(DiscoveryCandidate)
         .where(DiscoveryCandidate.review_status == review_status)
         .order_by(DiscoveryCandidate.discovered_on.desc())
+        .limit(max(1, min(limit, 200)))
     ).all()
 
 
