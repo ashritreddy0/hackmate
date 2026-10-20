@@ -196,11 +196,11 @@ function matchScore(event, profile) {
 export default function App() {
   const [signalSeed, setSignalSeed] = useState(0);
   const mindsets = [
-    { tag: "THE 2 AM VISIONARY", title: "One tiny idea. — Unreasonable confidence.", line: "You don’t need the perfect idea. You need a deadline and a teammate who says “wait, that might actually work.”", prompt: "Find a team. Make the weird thing." },
-    { tag: "THE TAB COLLECTOR", title: "Research is great. — Building is better.", line: "Your 38th open tab is not going to write the first line of code. Close three. Keep the useful one.", prompt: "Turn one saved link into a prototype." },
-    { tag: "THE QUIET COOKER", title: "Low noise. — High shipping energy.", line: "You don’t have to be the loudest person in the room. Let the demo do the talking.", prompt: "Pick a problem. Ship a small fix." },
-    { tag: "THE HAPPY ACCIDENT", title: "Wrong turn. — Interesting destination.", line: "Some of the best projects start with “that probably won’t work.” Curiosity is a valid roadmap.", prompt: "Explore one idea outside your comfort zone." },
-    { tag: "THE DEADLINE ATHLETE", title: "Powered by snacks — and mild panic.", line: "A little pressure can get you moving. A clear next step gets you over the finish line.", prompt: "Find a hackathon with a real deadline." },
+    { tag: "BRAIN HACK 01 · THE ZEIGARNIK EFFECT", title: "Your brain hates — an unfinished loop.", line: "A task feels less scary once it has a first step. Don’t plan the whole startup; write the one-sentence problem you want to solve.", prompt: "Take 20 seconds: describe a problem you’ve noticed.", action: "START SMALL", icon: "◔" },
+    { tag: "BRAIN HACK 02 · THE CURIOSITY GAP", title: "A question beats — another tutorial.", line: "Curiosity gives you a reason to learn. Pick a problem you genuinely want answered, then let the tech stack follow.", prompt: "What annoys you enough to build a fix for it?", action: "GET CURIOUS", icon: "?" },
+    { tag: "BRAIN HACK 03 · THE IKEA EFFECT", title: "You care more — when you make it.", line: "A rough prototype you built teaches you more than a perfect idea you keep polishing in your head. Make something you can show.", prompt: "Build the ugliest useful first version.", action: "MAKE A THING", icon: "↗" },
+    { tag: "BRAIN HACK 04 · SOCIAL PROOF, BUT USEFUL", title: "Find your people. — Borrow their momentum.", line: "A teammate can turn “someday” into a calendar invite. You don’t need a huge network; one curious person is enough.", prompt: "Message one person: “Want to build something this weekend?”", action: "FIND A TEAM", icon: "⌘" },
+    { tag: "BRAIN HACK 05 · THE FRESH-START EFFECT", title: "You can start — before you feel ready.", line: "Motivation often shows up after you begin, not before. Give yourself a tiny 10-minute start and stop when the timer ends if you want.", prompt: "Open a blank file. Give it ten minutes.", action: "BEGIN ANYWAY", icon: "⚡" },
   ];
   const [theme, setTheme] = useState(() => {
     try {
@@ -679,10 +679,10 @@ export default function App() {
           <section className="hackmate-signal" aria-label="HackMate rotating builder mindset">
             <div className="mindset-topbar">
               <span><i className="mindset-status-dot" /> HACKMATE FIELD NOTES</span>
-              <span>NO GURUS. JUST BUILDING.</span>
+              <span>SMALL PSYCHOLOGY. REAL PROGRESS.</span>
             </div>
             <div className="mindset-content" aria-live="polite">
-              <div className="mindset-index"><span>YOUR CURRENT BUILDING ARC</span><span>0{signalSeed + 1} / 05</span></div>
+              <div className="mindset-index"><span>A LITTLE NUDGE FOR YOUR BUILDER BRAIN</span><span>ROTATING NOTE · 0{signalSeed + 1}/05</span></div>
               <div className="mindset-main" key={signalSeed}>
                 <span className="mindset-tag">{mindsets[signalSeed].tag}</span>
                 <h2>{mindsets[signalSeed].title.split(" — ").map((part, index) => <span key={part}>{index > 0 && <br />}{part}</span>)}</h2>
@@ -691,13 +691,13 @@ export default function App() {
               </div>
               <div className="mindset-art" aria-hidden="true">
                 <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
-                <div className="art-core"><span>{["✳", "⌘", "↗", "◌", "⚡"][signalSeed]}</span></div>
-                <div className="art-label art-label-top">IDEA → PROTOTYPE</div>
+                <div className="art-core"><span>{mindsets[signalSeed].icon}</span></div>
+                <div className="art-label art-label-top">{mindsets[signalSeed].action} → PROTOTYPE</div>
                 <div className="art-label art-label-bottom">PROCRASTINATION.exe <b>STOPPED</b></div>
                 <div className="art-spark spark-one" /><div className="art-spark spark-two" /><div className="art-spark spark-three" />
               </div>
             </div>
-            <div className="mindset-footer"><span>REMINDER: YOU’RE ALLOWED TO BE A BEGINNER.</span><button type="button" onClick={() => setSignalSeed((seed) => (seed + 1) % 5)}>Next brain cell <span>↗</span></button></div>
+            <div className="mindset-footer"><span>NO NEED TO FEEL READY. JUST MAKE THE NEXT MOVE.</span><button type="button" onClick={() => setSignalSeed((seed) => (seed + 1) % 5)}>Give me another nudge <span>↗</span></button></div>
           </section>
 
           {error && <div className="expiry-notice" role="alert">{error}</div>}
