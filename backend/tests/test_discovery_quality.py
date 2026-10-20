@@ -1,6 +1,10 @@
 """Regression tests for HackMate discovery quality gates."""
 
 import unittest
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from unittest.mock import AsyncMock, patch
 
 from sqlalchemy import create_engine, select
