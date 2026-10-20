@@ -291,7 +291,7 @@ export default function App() {
   const searchInputRef = useRef(null);
   const [category, setCategory] = useState("All");
   const [formatFilter, setFormatFilter] = useState("All");
-  const [locationScope, setLocationScope] = useState("All India");
+  const [locationScope, setLocationScope] = useState("All listings");
   const [city, setCity] = useState(() => readStorage("hackmate-city", ""));
   const [sortBy, setSortBy] = useState("deadline");
 
@@ -357,15 +357,10 @@ export default function App() {
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error("Unexpected API response");
 
-       if (!cancelled) {
-  setEvents(
-    data.length > 0
-      ? data.map(normalize)
-      : hackathons.map(normalize)
-  );
-}
+        if (!cancelled) setEvents(data.map(normalize));
       } catch (err) {
         if (!cancelled) {
+          setEvents([]);
           setError(`Could not load hackathons from the backend: ${err.message}`);
         }
       } finally {
@@ -942,7 +937,7 @@ const tabs = ["Discover", "Saved", "My List"];
               <span className="filter-label">Location</span>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                 <select aria-label="Location filter" value={locationScope} onChange={(e) => setLocationScope(e.target.value)} style={{ padding: 11, minWidth: 190 }}>
-                  <option>All India</option>
+                  <option>All listings</option>
                   <option>Online</option>
                   <option>Near my city</option>
                 </select>
