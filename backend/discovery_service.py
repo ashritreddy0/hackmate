@@ -262,6 +262,14 @@ async def discover_candidates() -> dict:
 
     candidates = list(unique.values())
 
+    # Do not report a successful empty scan when every search provider query
+    # failed (e.g. an anti-bot challenge or network outage).
+    if failed_queries == len(SEARCH_QUERIES):
+        raise RuntimeError(
+            "All discovery searches failed. The search provider may be blocking "
+            "automated requests; try again later or configure a supported search API."
+        )
+
     # Known event platforms are useful leads, but other legitimate
     # university/company pages remain eligible for admin review.
     for candidate in candidates:
