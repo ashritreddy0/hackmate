@@ -590,19 +590,32 @@ async def approve_discovery_candidate(
         db.commit()
         raise HTTPException(409, "This event already exists in HackMate.")
 
-    # Keep the candidate pending if the official page cannot be extracted.
+    # Import should not be blocked by flaky/JS-heavy pages or optional metadata.
+    # The source link and search-result title are enough to create an unverified
+    # lead; dates/eligibility can be checked later by the user.
+    extraction_note = None
     try:
         details = await extract_candidate(source_url, candidate.snippet)
-    except HTTPException as exc:
-        candidate.review_note = (
-            f"Extraction failed ({exc.status_code}). "
-            "Candidate remains pending; check the official page manually."
-        )
-        db.commit()
-        raise HTTPException(
-            status_code=exc.status_code,
-            detail=f"{exc.detail} Candidate remains pending review.",
-        ) from exc
+    except Exception as exc:
+        extraction_note = f"Details could not be extracted automatically ({type(exc).__name__}); verify the source page manually."
+        fallback_title = (candidate.title or "").strip() or (urlparse(source_url).hostname or "Hackathon opportunity")
+        details = {
+            "title": fallback_title[:250],
+            "organizer": "Needs verification",
+            "format": "Unknown",
+            "location": "Unknown",
+            "category": "General",
+            "level": "All levels",
+            "eligibility": "Check the official rules",
+            "description": (candidate.snippet or "Discovered from a public search result. Verify event details on the source page.")[:8000],
+            "platform": urlparse(source_url).hostname or "Unknown",
+            "event_url": source_url,
+            "platform_url": source_url,
+            "registration_url": None,
+            "deadline": None,
+            "event_start": None,
+            "event_end": None,
+        }
 
     event_id = "discovery-" + hashlib.sha256(
         canonical_url(source_url).encode("utf-8")
@@ -633,9 +646,8 @@ async def approve_discovery_candidate(
         db.add(event)
         candidate.review_status = "Approved"
         candidate.title = details["title"]
-        candidate.review_note = (
-            "AI extracted event details. Verify official dates, eligibility, "
-            "registration availability, and organizer before marking verified."
+        candidate.review_note = extraction_note or (
+            "Added from source link. Verify deadline, eligibility, and registration details before marking verified."
         )
         db.commit()
         db.refresh(event)
