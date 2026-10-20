@@ -432,8 +432,8 @@ export default function App() {
     let result = mergedEvents.filter((event) => {
       if (activeTab === "Saved" && !saved.includes(event.id)) return false;
       if (activeTab === "My List" && !tracked.includes(event.id)) return false;
-      if (category !== "All" && event.category !== category) return false;
-      if (formatFilter !== "All" && event.format !== formatFilter) return false;
+      if (category !== "All" && String(event.category || "").toLowerCase() !== category.toLowerCase()) return false;
+      if (formatFilter !== "All" && String(event.format || "").toLowerCase() !== formatFilter.toLowerCase()) return false;
 
       const eventFormat = String(event.format || "").toLowerCase();
       const eventLocation = String(event.location || "").toLowerCase();
@@ -982,7 +982,7 @@ const tabs = ["Discover", "Saved", "My List"];
                   setSearch("");
                   setCategory("All");
                   setFormatFilter("All");
-                  setLocationScope("All India");
+                  setLocationScope("All listings");
                   setCity("");
                 }}>Clear filters</button>
               </div>
