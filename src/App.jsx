@@ -196,11 +196,11 @@ function matchScore(event, profile) {
 export default function App() {
   const [signalSeed, setSignalSeed] = useState(0);
   const mindsets = [
-    { tag: "THE 2 AM VISIONARY", title: "One tiny idea.\\nUnreasonable confidence.", line: "You don’t need the perfect idea. You need a deadline and a teammate who says “wait, that might actually work.”", prompt: "Find a team. Make the weird thing." },
-    { tag: "THE TAB COLLECTOR", title: "Research is great.\\nBuilding is better.", line: "Your 38th open tab is not going to write the first line of code. Close three. Keep the useful one.", prompt: "Turn one saved link into a prototype." },
-    { tag: "THE QUIET COOKER", title: "Low noise.\\nHigh shipping energy.", line: "You don’t have to be the loudest person in the room. Let the demo do the talking.", prompt: "Pick a problem. Ship a small fix." },
-    { tag: "THE HAPPY ACCIDENT", title: "Wrong turn.\\nInteresting destination.", line: "Some of the best projects start with “that probably won’t work.” Curiosity is a valid roadmap.", prompt: "Explore one idea outside your comfort zone." },
-    { tag: "THE DEADLINE ATHLETE", title: "Powered by snacks\\nand mild panic.", line: "A little pressure can get you moving. A clear next step gets you over the finish line.", prompt: "Find a hackathon with a real deadline." },
+    { tag: "THE 2 AM VISIONARY", title: "One tiny idea. — Unreasonable confidence.", line: "You don’t need the perfect idea. You need a deadline and a teammate who says “wait, that might actually work.”", prompt: "Find a team. Make the weird thing." },
+    { tag: "THE TAB COLLECTOR", title: "Research is great. — Building is better.", line: "Your 38th open tab is not going to write the first line of code. Close three. Keep the useful one.", prompt: "Turn one saved link into a prototype." },
+    { tag: "THE QUIET COOKER", title: "Low noise. — High shipping energy.", line: "You don’t have to be the loudest person in the room. Let the demo do the talking.", prompt: "Pick a problem. Ship a small fix." },
+    { tag: "THE HAPPY ACCIDENT", title: "Wrong turn. — Interesting destination.", line: "Some of the best projects start with “that probably won’t work.” Curiosity is a valid roadmap.", prompt: "Explore one idea outside your comfort zone." },
+    { tag: "THE DEADLINE ATHLETE", title: "Powered by snacks — and mild panic.", line: "A little pressure can get you moving. A clear next step gets you over the finish line.", prompt: "Find a hackathon with a real deadline." },
   ];
   const [theme, setTheme] = useState(() => {
     try {
@@ -685,7 +685,7 @@ export default function App() {
               <div className="mindset-index"><span>YOUR CURRENT BUILDING ARC</span><span>0{signalSeed + 1} / 05</span></div>
               <div className="mindset-main" key={signalSeed}>
                 <span className="mindset-tag">{mindsets[signalSeed].tag}</span>
-                <h2>{mindsets[signalSeed].title.split("\\n").map((part, index) => <span key={part}>{index > 0 && <br />}{part}</span>)}</h2>
+                <h2>{mindsets[signalSeed].title.split(" — ").map((part, index) => <span key={part}>{index > 0 && <br />}{part}</span>)}</h2>
                 <p>{mindsets[signalSeed].line}</p>
                 <div className="mindset-prompt"><span>YOUR SIDE QUEST</span><strong>{mindsets[signalSeed].prompt}</strong></div>
               </div>
