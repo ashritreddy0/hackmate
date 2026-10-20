@@ -194,37 +194,6 @@ function matchScore(event, profile) {
 }
 
 export default function App() {
-  useEffect(() => {
-    const finePointer = window.matchMedia("(pointer: fine)").matches;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!finePointer || reducedMotion) return undefined;
-
-    let frame = 0;
-    const root = document.documentElement;
-    const onPointerMove = (event) => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        root.style.setProperty("--cursor-x", `${event.clientX}px`);
-        root.style.setProperty("--cursor-y", `${event.clientY}px`);
-        root.dataset.cursorVisible = "true";
-      });
-    };
-    const onPointerLeave = () => { root.dataset.cursorVisible = "false"; };
-    const onPointerEnter = () => { root.dataset.cursorVisible = "true"; };
-
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    document.addEventListener("pointerleave", onPointerLeave);
-    document.addEventListener("pointerenter", onPointerEnter);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerleave", onPointerLeave);
-      document.removeEventListener("pointerenter", onPointerEnter);
-      delete root.dataset.cursorVisible;
-      root.style.removeProperty("--cursor-x");
-      root.style.removeProperty("--cursor-y");
-    };
-  }, []);
   const [activeTab, setActiveTab] = useState("Discover");
   const [events, setEvents] = useState(hackathons.map(normalize));
   const [loading, setLoading] = useState(true);
