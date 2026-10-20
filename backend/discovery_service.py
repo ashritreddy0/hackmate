@@ -158,9 +158,18 @@ async def search_one_query(
     soup = BeautifulSoup(response.text, "html.parser")
     results = []
 
-    for result in soup.select(".result"):
-        link = result.select_one(".result__a")
-        snippet_node = result.select_one(".result__snippet")
+    for result in soup.select(".result, .web-result, [data-testid='result'], article"):
+        link = (
+            result.select_one(".result__a")
+            or result.select_one("a[data-testid='result-title-a']")
+            or result.select_one("a[href]")
+        )
+        snippet_node = (
+            result.select_one(".result__snippet")
+            or result.select_one("[data-testid='result-snippet']")
+            or result.select_one(".snippet")
+            or result.select_one("p")
+        )
 
         if not link:
             continue
