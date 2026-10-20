@@ -155,6 +155,16 @@ async def search_one_query(
     except httpx.HTTPError as exc:
         raise RuntimeError(f"Search request failed for query {query!r}: {exc}") from exc
 
+    body_lower = response.text.lower()
+    # DuckDuckGo can return a successful HTTP response containing an anti-bot
+    # page instead of results. Count that as a failed query, not a false zero.
+    challenge_markers = (
+        "anomaly-modal", "bots use duckduckgo", "select all squares",
+        "captcha", "unfortunately, bots",
+    )
+    if any(marker in body_lower for marker in challenge_markers):
+        raise RuntimeError(f"Search provider returned an anti-bot challenge for query {query!r}")
+
     soup = BeautifulSoup(response.text, "html.parser")
     results = []
 
