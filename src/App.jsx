@@ -695,7 +695,7 @@ export default function App() {
             <div className="signal-footer"><span>STATUS: YOUR POTENTIAL IS BUFFERING</span><span>TIP: SHIP FIRST. PANIC LATER.</span></div>
           </section>
 
-          {error && <div className="expiry-notice" role="alert">{error}</div>
+          {error && <div className="expiry-notice" role="alert">{error}</div>}
           {loading && <p role="status">Loading hackathons from your database…</p>}
 
           {activeTab === "Discover" && (
