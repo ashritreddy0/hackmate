@@ -217,3 +217,83 @@
   .hackathon-card { padding: 18px; border-radius: 16px; }
   .hackathon-details { grid-template-columns: 1fr; }
 }
+
+
+/* Keep opportunity cards scannable; tuck power-user controls into a disclosure */
+.card-management {
+  margin-top: 1px;
+  border: 1px solid #eceaf6;
+  border-radius: 13px;
+  background: #fcfbff;
+  overflow: hidden;
+}
+.card-management > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px;
+  color: #373251;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 750;
+}
+.card-management > summary::-webkit-details-marker { display: none; }
+.card-management > summary::after {
+  content: "＋";
+  flex: 0 0 auto;
+  color: #6b58e8;
+  font-size: 16px;
+  transition: transform 180ms ease;
+}
+.card-management[open] > summary::after { content: "−"; }
+.card-management > summary:hover { background: #f5f3ff; }
+.management-summary-hint {
+  margin-left: auto;
+  color: #8b87a2;
+  font-size: 10px;
+  font-weight: 500;
+}
+.management-summary-hint > span { display: none; }
+.card-management > section,
+.card-management > .source-check-panel,
+.card-management > .event-edit-actions,
+.card-management > .event-edit-form {
+  margin: 0 12px 12px;
+}
+.card-management .event-status-panel {
+  padding: 13px;
+  border: 1px solid #eceaf6;
+  background: #fff;
+}
+.card-management .source-check-panel { padding: 13px; }
+.card-management .event-edit-actions { padding: 0; }
+.card-management .event-edit-form { padding: 14px; }
+.card-management .event-status-select { max-width: 100%; }
+.hackathon-card-actions { gap: 12px; }
+.hackathon-card-actions .track-button {
+  min-height: 42px;
+  padding-inline: 16px;
+}
+.hackathon-card-actions .explore-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid #e5e2f5;
+  border-radius: 999px;
+  background: #f8f7ff;
+  color: #5d4bd7;
+}
+.hackathon-card-actions .explore-button:hover {
+  border-color: #c9c2fa;
+  background: #f0edff;
+  text-decoration: none;
+}
+@media (max-width: 480px) {
+  .card-management > summary { align-items: flex-start; }
+  .management-summary-hint { display: none; }
+  .management-summary-hint > span { display: inline; }
+}
