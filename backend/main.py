@@ -476,7 +476,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
     try:
         result = await discover_candidates()
     except Exception as exc:
-        raise HTTPException(502, f"Discovery search failed: {type(exc).__name__}") from exc
+        raise HTTPException(502, f"Discovery search failed: {type(exc).__name__}: {str(exc)[:500]}") from exc
 
     added = 0
     duplicates = 0
