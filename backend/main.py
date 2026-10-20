@@ -491,6 +491,19 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
     added = 0
     duplicates = 0
 
+    # Load existing URLs once. Previously these tables were queried again for
+    # every search result, making scans slower as the database grew.
+    existing_candidate_urls = {
+        canonical_url(candidate.source_url)
+        for candidate in db.scalars(select(DiscoveryCandidate)).all()
+    }
+    existing_event_urls = {
+        canonical_url(url)
+        for event in db.scalars(select(Hackathon)).all()
+        for url in (event.event_url, event.registration_url, event.platform_url)
+        if url
+    }
+
     try:
         for item in result.get("candidates", []):
             source_url = str(item.get("source_url") or "").strip()
@@ -499,19 +512,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
                 continue
 
             normalized = canonical_url(source_url)
-            existing_candidate = db.scalars(select(DiscoveryCandidate)).all()
-            if any(canonical_url(c.source_url) == normalized for c in existing_candidate):
-                duplicates += 1
-                continue
-
-            existing_event = db.scalars(select(Hackathon)).all()
-            existing_urls = {
-                canonical_url(u)
-                for e in existing_event
-                for u in (e.event_url, e.registration_url, e.platform_url)
-                if u
-            }
-            if normalized in existing_urls:
+            if normalized in existing_candidate_urls or normalized in existing_event_urls:
                 duplicates += 1
                 continue
 
@@ -524,6 +525,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
                 review_status="Pending review",
                 review_note="AI extraction and official details will be checked on approval.",
             ))
+            existing_candidate_urls.add(normalized)
             added += 1
 
         db.commit()
