@@ -152,8 +152,8 @@ async def search_one_query(
             },
         )
         response.raise_for_status()
-    except httpx.HTTPError:
-        return []
+    except httpx.HTTPError as exc:
+        raise RuntimeError(f"Search request failed for query {query!r}: {exc}") from exc
 
     soup = BeautifulSoup(response.text, "html.parser")
     results = []
