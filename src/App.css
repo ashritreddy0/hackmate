@@ -1909,3 +1909,52 @@ html, body { background: #f1f1f4 !important; }
 @media (prefers-reduced-motion: reduce) {
   .app-shell::before, .app-shell::after { display: none !important; }
 }
+
+
+/* Direct-manipulation orbit: grab, rotate in any direction, wheel to tilt/zoom. */
+.mindset-art { touch-action: pan-y; }
+.orbit-playfield {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  outline: none;
+}
+.orbit-playfield[data-dragging="true"] { cursor: grabbing; touch-action: none; }
+.orbit-playfield:focus-visible { box-shadow: inset 0 0 0 2px #7057ff; }
+.orbit-playfield .art-orbit,
+.orbit-playfield .art-core {
+  transform-origin: center;
+  animation: none !important;
+  transition: transform 100ms ease-out;
+}
+.orbit-playfield .orbit-one {
+  transform: rotate(calc(var(--orbit-angle, 0deg) - 24deg)) rotateX(var(--orbit-tilt, 0deg)) scaleX(calc(1.5 * var(--orbit-scale, 1)));
+}
+.orbit-playfield .orbit-two {
+  transform: rotate(calc(var(--orbit-angle, 0deg) + 30deg)) rotateX(calc(var(--orbit-tilt, 0deg) * -1)) scaleX(calc(1.55 * var(--orbit-scale, 1)));
+}
+.orbit-playfield .art-core {
+  transform: rotate(calc(var(--orbit-angle, 0deg) * -0.35 - 8deg)) scale(var(--orbit-scale, 1));
+}
+.orbit-hint {
+  position: absolute;
+  left: 10px;
+  bottom: 9px;
+  z-index: 2;
+  padding: 5px 7px;
+  border: 1px solid rgba(112,87,255,.18);
+  background: rgba(250,250,253,.86);
+  color: #777184;
+  font: 7px "DM Mono", Consolas, monospace;
+  letter-spacing: .05em;
+  pointer-events: none;
+}
+:root[data-theme="dark"] .orbit-hint { background: rgba(23,23,32,.88); color: #aaa6c4; border-color: #494263; }
+@media (prefers-reduced-motion: reduce) {
+  .orbit-playfield .art-orbit, .orbit-playfield .art-core { transition: none; }
+}
