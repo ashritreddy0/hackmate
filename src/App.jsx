@@ -194,6 +194,40 @@ function matchScore(event, profile) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!finePointer || reducedMotion) return undefined;
+
+    let frame = 0;
+    const root = document.documentElement;
+    const onPointerMove = (event) => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        root.style.setProperty("--cursor-x", `${event.clientX}px`);
+        root.style.setProperty("--cursor-y", `${event.clientY}px`);
+        const interactive = event.target instanceof Element && event.target.closest("a, button, input, select, textarea, [role=button]");
+        root.dataset.cursorHover = interactive ? "true" : "false";
+      });
+    };
+    const onPointerLeave = () => { root.dataset.cursorVisible = "false"; };
+    const onPointerEnter = () => { root.dataset.cursorVisible = "true"; };
+
+    root.dataset.cursorVisible = "true";
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.addEventListener("pointerleave", onPointerLeave);
+    document.addEventListener("pointerenter", onPointerEnter);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerleave", onPointerLeave);
+      document.removeEventListener("pointerenter", onPointerEnter);
+      delete root.dataset.cursorVisible;
+      delete root.dataset.cursorHover;
+      root.style.removeProperty("--cursor-x");
+      root.style.removeProperty("--cursor-y");
+    };
+  }, []);
   const [activeTab, setActiveTab] = useState("Discover");
   const [events, setEvents] = useState(hackathons.map(normalize));
   const [loading, setLoading] = useState(true);
@@ -481,12 +515,12 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="#top" onClick={() => setActiveTab("Discover")}>
+        <a className="brand" href="#top" aria-label="HackMate home" onClick={() => setActiveTab("Discover")}>
           <span className="brand-icon">H</span>
           <span>HackMate</span>
         </a>
 
-        <nav className="main-nav">
+        <nav className="main-nav" aria-label="Main navigation">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -554,10 +588,10 @@ export default function App() {
         </main>
       ) : (
         <main>
-          <section className="hero-section">
+          <section className="hero-section" aria-labelledby="hero-title">
             <div className="hero-content">
               <span className="eyebrow">YOUR NEXT BIG IDEA STARTS HERE</span>
-              <h1>Find your next <span>hackathon.</span></h1>
+              <h1 id="hero-title">Find your next <span>hackathon.</span></h1>
               <p>Discover events that fit your skills, interests, experience and goals.</p>
               <button className="primary-button" onClick={() => {
                 setActiveTab("Discover");
