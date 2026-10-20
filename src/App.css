@@ -715,3 +715,75 @@ a {
     padding: 28px 16px 44px !important;
   }
 }
+
+
+/* HackMate visual refresh — clearer hierarchy, richer contrast, responsive polish */
+.app-shell { background: #f7f8fc; }
+.site-header {
+  min-height: 74px;
+  border-bottom-color: #e5e9f3;
+  box-shadow: 0 5px 24px rgba(26, 37, 70, .035);
+}
+.brand-icon {
+  background: linear-gradient(145deg, #6657e8, #4269e8);
+  box-shadow: 0 7px 18px rgba(82, 93, 224, .28);
+}
+.nav-link { border-radius: 999px; padding: 10px 16px; }
+.nav-link:hover, .nav-link.active { background: #ecebff; color: #5144c8; }
+.hero-section {
+  min-height: 410px;
+  margin-top: 28px;
+  padding: clamp(34px, 6vw, 68px);
+  border: 1px solid #e5e5ff;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 85% 15%, rgba(116, 104, 255, .25), transparent 36%),
+    radial-gradient(ellipse at 95% 95%, rgba(54, 146, 255, .18), transparent 32%),
+    linear-gradient(120deg, #111832 0%, #202750 56%, #302c69 100%);
+  box-shadow: 0 22px 60px rgba(25, 31, 75, .12);
+}
+.hero-content { max-width: 720px; }
+.hero-content .eyebrow { color: #bfc4ff; }
+.hero-content h1 { color: #fff; max-width: 680px; }
+.hero-content h1 span {
+  color: #b9b5ff;
+  background: linear-gradient(90deg, #bcb7ff, #8dd8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-content > p { color: #d0d5e8; max-width: 530px; }
+.hero-content .primary-button {
+  background: linear-gradient(100deg, #7668f5, #5478ed);
+  box-shadow: 0 10px 24px rgba(83, 100, 232, .3);
+}
+.hero-content .primary-button:hover { background: linear-gradient(100deg, #6758e8, #4268dc); }
+.discovery-section { padding: 30px 0 76px; scroll-margin-top: 100px; }
+.section-heading h2 { letter-spacing: -1.4px; }
+.personalization {
+  box-shadow: 0 12px 38px rgba(32, 42, 90, .055);
+}
+.search-box, .personalization, .empty-state {
+  box-shadow: 0 8px 24px rgba(32, 42, 90, .035);
+}
+.category-chip { border-radius: 999px; padding: 9px 14px; }
+.category-chip.selected {
+  border-color: #5b53dc;
+  background: linear-gradient(110deg, #6659e7, #496fe7);
+  box-shadow: 0 5px 14px rgba(86, 90, 221, .2);
+}
+.results-heading { margin-top: 34px; }
+.hackathon-grid { gap: 22px; }
+.admin-discovery > p { color: #69758c; }
+.admin-discovery article { box-shadow: 0 8px 24px rgba(32, 42, 90, .04); }
+.footer { margin-top: 10px; }
+@media (max-width: 800px) {
+  .hero-section { margin-top: 18px; border-radius: 22px; }
+}
+@media (max-width: 480px) {
+  .hero-section { margin-top: 12px; padding: 28px 22px; border-radius: 18px; }
+  .hero-content h1 { font-size: clamp(37px, 10vw, 44px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
