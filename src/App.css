@@ -1132,3 +1132,225 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .value-strip { padding: 0 17px; }
   .search-shortcut { display: none; }
 }
+
+
+/* ===== Warp-inspired Gen-Z refresh: white canvas, electric violet + acid lime ===== */
+:root {
+  --hm-ink: #17152b;
+  --hm-muted: #727087;
+  --hm-line: #e9e7f2;
+  --hm-purple: #7057ff;
+  --hm-blue: #4e8cff;
+  --hm-lime: #c8ff43;
+  --hm-surface: #ffffff;
+  --hm-shadow: 0 18px 55px rgba(39, 31, 91, 0.065);
+  --cursor-x: -200px;
+  --cursor-y: -200px;
+}
+
+html, body { background: #fff; }
+body { color: var(--hm-ink); }
+.app-shell {
+  background: #fff !important;
+  color: var(--hm-ink);
+}
+.app-shell::before {
+  z-index: 0;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(280px circle at var(--cursor-x) var(--cursor-y), rgba(112, 87, 255, .13), transparent 72%),
+    radial-gradient(170px circle at calc(var(--cursor-x) + 34px) calc(var(--cursor-y) + 25px), rgba(200, 255, 67, .12), transparent 74%);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+.app-shell > * { position: relative; z-index: 1; }
+:root[data-cursor-visible="true"] .app-shell::before { opacity: 1; }
+/* No fake ring or replacement pointer: just the soft, ambient Warp-like cursor glow. */
+body::after { display: none !important; }
+
+.site-header {
+  background: rgba(255,255,255,.88) !important;
+  border-bottom: 1px solid #efedf6;
+  box-shadow: 0 5px 28px rgba(30, 25, 65, .035);
+  backdrop-filter: blur(20px);
+}
+.brand { color: #17152b; }
+.brand-icon {
+  background: linear-gradient(135deg, #7057ff 0%, #8d68ff 55%, #4e8cff 100%);
+  border-radius: 13px;
+  box-shadow: 0 7px 20px rgba(112,87,255,.22);
+}
+.nav-link { color: #6f6b84; }
+.nav-link:hover, .nav-link.active {
+  background: #f0edff;
+  color: #6348ed;
+}
+
+.hero-section {
+  min-height: 390px;
+  margin-top: 22px;
+  padding: clamp(32px, 5.7vw, 66px);
+  border: 1px solid #eeebfa;
+  border-radius: 30px;
+  background:
+    radial-gradient(ellipse at 87% 12%, rgba(112,87,255,.105), transparent 30%),
+    radial-gradient(ellipse at 94% 93%, rgba(200,255,67,.16), transparent 27%),
+    linear-gradient(135deg, #fff 0%, #fdfcff 63%, #fbfff3 100%);
+  box-shadow: 0 22px 65px rgba(45, 32, 100, .055);
+}
+.hero-content .eyebrow {
+  border-color: #e8e2ff;
+  background: #f8f6ff;
+  color: #6549f0;
+}
+.hero-content .eyebrow::before {
+  background: var(--hm-lime);
+  box-shadow: 0 0 0 4px rgba(200,255,67,.24);
+}
+.hero-content h1 {
+  color: #17152b;
+  letter-spacing: -4.5px;
+}
+.hero-content h1 span {
+  background: linear-gradient(100deg, #7057ff 4%, #8b54f6 45%, #377fe9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-content > p { color: #706d83; }
+.primary-button {
+  color: #fff;
+  background: linear-gradient(110deg, #7057ff, #6246ed);
+  box-shadow: 0 9px 24px rgba(112,87,255,.22);
+}
+.primary-button:hover {
+  background: linear-gradient(110deg, #6045ef, #4d78ed);
+  box-shadow: 0 13px 30px rgba(112,87,255,.28);
+}
+
+.eyebrow { color: #7057ff; }
+.section-heading h2, .guide-section h2,
+.personalization h2 { color: #17152b; }
+.section-heading p, .guide-section p { color: #77738a; }
+.personalization {
+  border-color: #eae6fb !important;
+  background: #fff !important;
+  box-shadow: 0 14px 42px rgba(39,31,91,.055);
+}
+.category-chip {
+  border-color: #e8e6f1;
+  background: #fff;
+  color: #6f6b84;
+}
+.category-chip:hover {
+  border-color: #bdb0ff;
+  background: #faf9ff;
+  color: #6246ed;
+}
+.category-chip.selected {
+  border-color: #7057ff;
+  background: #7057ff;
+  color: #fff;
+  box-shadow: 0 6px 17px rgba(112,87,255,.2);
+}
+.search-box {
+  border-color: #e7e4f0;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(39,31,91,.035);
+}
+.search-box:focus-within {
+  border-color: #a99aff;
+  box-shadow: 0 0 0 4px rgba(112,87,255,.09);
+}
+.search-shortcut {
+  border-color: #e9e4ff;
+  background: #f7f5ff;
+  color: #7057ff;
+}
+.sort-control select, .personalization select, .personalization input {
+  border-color: #e6e3f0;
+  border-radius: 10px;
+}
+.value-strip-stat {
+  border-color: #eeebf7;
+  background: #fff;
+}
+.value-strip-icon {
+  background: #f0edff;
+  color: #7057ff;
+}
+.value-strip-stat:nth-child(2) .value-strip-icon {
+  background: #f4ffd9;
+  color: #496b00;
+}
+.value-strip-stat:nth-child(3) .value-strip-icon {
+  background: #eaf4ff;
+  color: #347be6;
+}
+.value-strip-stat strong { color: #24213b; }
+.results-heading strong { color: #7057ff; }
+.guide-section {
+  border-color: #eae6fa;
+  background:
+    radial-gradient(ellipse at 95% 10%, rgba(200,255,67,.17), transparent 28%),
+    linear-gradient(120deg, #fbfaff, #fff);
+}
+.guide-steps > div {
+  border-color: #ebe8f5;
+  background: rgba(255,255,255,.9);
+}
+.guide-steps span { color: #7057ff; }
+.empty-icon {
+  background: #f0edff;
+  color: #7057ff;
+}
+.reset-button { background: #7057ff; }
+.footer {
+  background: #fff;
+  border-top-color: #efedf6;
+}
+.admin-discovery a { color: #7057ff; }
+:focus-visible { outline-color: rgba(112,87,255,.55); }
+::selection { background: #e5ff9e; color: #17152b; }
+
+/* Crisp white cards with sharper electric accents */
+.hackathon-card {
+  border-color: #e9e6f2 !important;
+  background: #fff !important;
+  box-shadow: 0 8px 28px rgba(31,24,75,.045) !important;
+}
+.hackathon-card:hover {
+  border-color: #c9beff !important;
+  box-shadow: 0 18px 42px rgba(73,54,156,.11) !important;
+}
+.hackathon-card h3 { color: #17152b; }
+.hackathon-organizer, .explore-button { color: #7057ff; }
+.hackathon-tags span { background: #f5f3ff; color: #6253a8; }
+.hackathon-details > div { border-color: #efedf7; background: #fcfbff; }
+.save-button.is-active, .track-button.is-active {
+  background: #f0edff;
+  color: #6246ed;
+  border-color: #cfc5ff;
+}
+.hackathon-card-actions .explore-button {
+  border-color: #ded7ff;
+  background: #f7f5ff;
+  color: #6246ed;
+}
+.card-management { border-color: #eae6f6; background: #fdfcff; }
+.card-management > summary { color: #373251; }
+.card-management > summary::after { color: #7057ff; }
+.card-management > summary:hover { background: #f4f1ff; }
+
+@media (max-width: 800px) {
+  .hero-section { margin-top: 16px; border-radius: 23px; }
+}
+@media (max-width: 480px) {
+  .hero-section { margin-top: 12px; padding: 28px 21px; border-radius: 19px; }
+  .hero-content h1 { letter-spacing: -2.7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before { display: none !important; }
+}
