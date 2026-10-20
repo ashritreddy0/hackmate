@@ -1357,13 +1357,77 @@ body::after { display: none !important; }
 }
 
 
-/* Make the Warp-style cursor spotlight noticeably deeper while preserving the white canvas. */
+/* Element-reactive glow: keep the canvas clean and light up only the item under the pointer. */
 .app-shell::before {
-  background:
-    radial-gradient(260px circle at var(--cursor-x) var(--cursor-y), rgba(26, 17, 67, .32) 0%, rgba(59, 37, 133, .26) 23%, rgba(112, 87, 255, .17) 49%, transparent 77%),
-    radial-gradient(180px circle at calc(var(--cursor-x) + 30px) calc(var(--cursor-y) + 24px), rgba(200, 255, 67, .21) 0%, rgba(200, 255, 67, .09) 43%, transparent 76%);
+  display: none !important;
+  content: none !important;
 }
-:root[data-cursor-visible="true"] .app-shell::before { opacity: 1; }
-@media (max-width: 800px), (prefers-reduced-motion: reduce) {
-  .app-shell::before { display: none !important; }
+.hackathon-card,
+.category-chip,
+.value-strip-stat,
+.guide-steps > div,
+.primary-button,
+.explore-button,
+.nav-link,
+.search-box,
+.personalization select,
+.personalization input,
+.sort-control select {
+  transition:
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+.hackathon-card:hover,
+.hackathon-card:focus-within {
+  border-color: rgba(112, 87, 255, .58) !important;
+  box-shadow:
+    0 0 0 1px rgba(112, 87, 255, .13),
+    0 0 24px rgba(112, 87, 255, .19),
+    0 18px 42px rgba(73, 54, 156, .11) !important;
+}
+.category-chip:hover,
+.category-chip:focus-visible {
+  box-shadow: 0 0 0 3px rgba(112, 87, 255, .12), 0 0 18px rgba(112, 87, 255, .18);
+}
+.value-strip-stat:hover,
+.value-strip-stat:focus-within,
+.guide-steps > div:hover,
+.guide-steps > div:focus-within {
+  border-color: rgba(112, 87, 255, .42);
+  box-shadow: 0 0 0 1px rgba(112, 87, 255, .08), 0 0 22px rgba(112, 87, 255, .14);
+}
+.primary-button:hover,
+.primary-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(112, 87, 255, .14), 0 0 28px rgba(112, 87, 255, .32);
+}
+.nav-link:hover,
+.nav-link:focus-visible {
+  box-shadow: 0 0 18px rgba(112, 87, 255, .16);
+}
+.search-box:focus-within,
+.personalization select:focus,
+.personalization input:focus,
+.sort-control select:focus {
+  box-shadow: 0 0 0 3px rgba(112, 87, 255, .12), 0 0 20px rgba(112, 87, 255, .14);
+}
+.explore-button:hover,
+.explore-button:focus-visible {
+  box-shadow: 0 0 18px rgba(112, 87, 255, .2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hackathon-card,
+  .category-chip,
+  .value-strip-stat,
+  .guide-steps > div,
+  .primary-button,
+  .explore-button,
+  .nav-link,
+  .search-box,
+  .personalization select,
+  .personalization input,
+  .sort-control select {
+    transition: none !important;
+  }
 }
