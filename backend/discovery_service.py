@@ -274,9 +274,10 @@ async def ai_filter_candidates(candidates: list[dict]) -> tuple[list[dict], int]
     events should not enter the public discovery feed.
     """
     api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key or not candidates:
-        # Do not silently claim AI validation when no key is configured.
-        return candidates, 0
+    if not candidates:
+        return [], 0
+    if not api_key:
+        raise RuntimeError("AI screening is required but GEMINI_API_KEY is not configured.")
 
     client = genai.Client(api_key=api_key)
     accepted = []
@@ -334,11 +335,10 @@ async def ai_filter_candidates(candidates: list[dict]) -> tuple[list[dict], int]
                 else:
                     rejected += 1
         except Exception as exc:
-            # If AI is temporarily unavailable, preserve leads transparently
-            # rather than reporting a successful AI-screened result.
-            for candidate in batch:
-                candidate["ai_screening"] = f"AI screening unavailable: {type(exc).__name__}"
-                accepted.append(candidate)
+            # Fail closed: never send unscreened search results into the queue.
+            raise RuntimeError(
+                f"AI screening failed; no unscreened candidates were queued ({type(exc).__name__})."
+            ) from exc
 
     return accepted, rejected
 
