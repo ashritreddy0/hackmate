@@ -194,6 +194,59 @@ function matchScore(event, profile) {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("hackmate-theme");
+      if (saved === "light" || saved === "dark") return saved;
+    } catch {}
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("hackmate-theme", theme); } catch {}
+  }, [theme]);
+
+  useEffect(() => {
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!finePointer || reducedMotion) return undefined;
+
+    const root = document.documentElement;
+    let frame = 0;
+    const interactiveSelector = [
+      ".hackathon-card", ".category-chip", ".value-strip-stat", ".guide-steps > div",
+      ".primary-button", ".explore-button", ".nav-link", ".search-box",
+      ".personalization select", ".personalization input", ".sort-control select",
+      "button", "a", "input", "select", "textarea", "[role='button']"
+    ].join(",");
+    const updatePointer = (event) => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        root.style.setProperty("--cursor-x", `${event.clientX}px`);
+        root.style.setProperty("--cursor-y", `${event.clientY}px`);
+        const onElement = Boolean(event.target?.closest?.(interactiveSelector));
+        root.dataset.pointerOnElement = String(onElement);
+        root.dataset.backgroundGlow = onElement ? "false" : "true";
+      });
+    };
+    const clearPointer = () => {
+      root.dataset.backgroundGlow = "false";
+      root.dataset.pointerOnElement = "false";
+    };
+    window.addEventListener("pointermove", updatePointer, { passive: true });
+    document.addEventListener("pointerleave", clearPointer);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", updatePointer);
+      document.removeEventListener("pointerleave", clearPointer);
+      delete root.dataset.backgroundGlow;
+      delete root.dataset.pointerOnElement;
+      root.style.removeProperty("--cursor-x");
+      root.style.removeProperty("--cursor-y");
+    };
+  }, []);
+
   const [activeTab, setActiveTab] = useState("Discover");
   const [events, setEvents] = useState(hackathons.map(normalize));
   const [loading, setLoading] = useState(true);
@@ -515,6 +568,16 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          <span className="theme-toggle-label">{theme === "dark" ? "Light" : "Dark"}</span>
+        </button>
       </header>
 
       {activeTab === "Admin Discovery" ? (
