@@ -1,5 +1,6 @@
 
 from contextlib import asynccontextmanager
+import asyncio
 from datetime import date
 from pathlib import Path
 from typing import Optional
@@ -192,10 +193,45 @@ def payload_to_db_values(payload: BaseModel, **options):
     return values
 
 
+async def discovery_scheduler():
+    """Run discovery while the API process is awake (free hosts may sleep)."""
+    initial_delay = max(30, int(os.getenv("DISCOVERY_INITIAL_DELAY_SECONDS", "90")))
+    interval = max(3600, int(os.getenv("DISCOVERY_INTERVAL_SECONDS", "21600")))
+    await asyncio.sleep(initial_delay)
+    while True:
+        db = SessionLocal()
+        try:
+            result = await scan_for_hackathons(db)
+            print(
+                "Scheduled HackMate discovery completed:",
+                result.get("published_now", 0), "published;",
+                result.get("duplicates_skipped", 0), "duplicates skipped"
+            )
+        except Exception as exc:
+            print(f"Scheduled HackMate discovery failed: {type(exc).__name__}: {exc}")
+        finally:
+            db.close()
+        await asyncio.sleep(interval)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(discovery_scheduler())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
 app = FastAPI(
     title="HackMate API",
     description="Hackathon discovery, extraction and management API.",
-    version="3.0.0",
+    version="3.1.0",
+    lifespan=lifespan,
 )
 
 from ai_importer import router as ai_importer_router
