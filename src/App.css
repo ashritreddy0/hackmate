@@ -1958,3 +1958,25 @@ html, body { background: #f1f1f4 !important; }
 @media (prefers-reduced-motion: reduce) {
   .orbit-playfield .art-orbit, .orbit-playfield .art-core { transition: none; }
 }
+
+
+/* The orbit runs continuously on its own; dragging adds/subtracts from its angle. */
+.orbit-auto-spin {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  pointer-events: none;
+  animation: orbitSelfRotate 24s linear infinite;
+}
+.orbit-auto-spin .art-orbit { pointer-events: none; }
+@keyframes orbitSelfRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* Keep user drag control smooth in either direction while autonomous motion continues. */
+.orbit-playfield[data-dragging="true"] .orbit-auto-spin {
+  animation-duration: 10s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-auto-spin { animation: none !important; }
+}
