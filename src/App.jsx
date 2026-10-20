@@ -239,7 +239,13 @@ export default function App() {
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error("Unexpected API response");
 
-        if (!cancelled) setEvents(data.map(normalize));
+       if (!cancelled) {
+  setEvents(
+    data.length > 0
+      ? data.map(normalize)
+      : hackathons.map(normalize)
+  );
+}
       } catch (err) {
         if (!cancelled) {
           setError(`Could not load hackathons from the backend: ${err.message}`);
