@@ -58,12 +58,18 @@ function HackathonCard({
   const [formError, setFormError] = useState("");
 
   const [form, setForm] = useState({
+    title: hackathon.title || "",
+    organizer: hackathon.organizer || "",
+    location: hackathon.location || "",
+    format: hackathon.format || "Unknown",
+    category: hackathon.category || "General",
+    description: hackathon.description || "",
+    eligibility: hackathon.eligibility || "",
     deadline: hackathon.deadline || "",
     eventStart: hackathon.eventStart || "",
     eventEnd: hackathon.eventEnd || "",
     registrationUrl: hackathon.registrationUrl || "",
     eventUrl: hackathon.eventUrl || "",
-    organizer: hackathon.organizer || "",
   });
 
   const source = getSourceInfo(hackathon);
@@ -98,12 +104,18 @@ function HackathonCard({
 
   function startEditing() {
     setForm({
+      title: hackathon.title || "",
+      organizer: hackathon.organizer || "",
+      location: hackathon.location || "",
+      format: hackathon.format || "Unknown",
+      category: hackathon.category || "General",
+      description: hackathon.description || "",
+      eligibility: hackathon.eligibility || "",
       deadline: hackathon.deadline || "",
       eventStart: hackathon.eventStart || "",
       eventEnd: hackathon.eventEnd || "",
       registrationUrl: hackathon.registrationUrl || "",
       eventUrl: hackathon.eventUrl || "",
-      organizer: hackathon.organizer || "",
     });
     setFormError("");
     setEditing(true);
@@ -135,7 +147,12 @@ function HackathonCard({
 
     onUpdateEvent(hackathon.id, {
       ...form,
-      organizer: form.organizer.trim() || hackathon.organizer,
+      title: form.title.trim() || hackathon.title,
+      organizer: form.organizer.trim() || "Needs verification",
+      location: form.location.trim() || "Unknown",
+      category: form.category.trim() || "General",
+      description: form.description.trim(),
+      eligibility: form.eligibility.trim() || "Check the official rules",
     });
 
     setEditing(false);
@@ -296,12 +313,34 @@ function HackathonCard({
             <p>Changes update HackMate's record when the backend accepts them; they do not change the organizer's website.</p>
   
             <label>
+              Event title
+              <input value={form.title} onChange={(event) => updateField("title", event.target.value)} maxLength={250} required />
+            </label>
+            <label>
               Organizer
-              <input
-                value={form.organizer}
-                onChange={(event) => updateField("organizer", event.target.value)}
-                maxLength={120}
-              />
+              <input value={form.organizer} onChange={(event) => updateField("organizer", event.target.value)} maxLength={250} />
+            </label>
+            <label>
+              Location
+              <input value={form.location} onChange={(event) => updateField("location", event.target.value)} maxLength={250} />
+            </label>
+            <label>
+              Format
+              <select value={form.format} onChange={(event) => updateField("format", event.target.value)}>
+                <option>Online</option><option>Offline</option><option>Hybrid</option><option>Unknown</option>
+              </select>
+            </label>
+            <label>
+              Category
+              <input value={form.category} onChange={(event) => updateField("category", event.target.value)} maxLength={150} />
+            </label>
+            <label>
+              Description
+              <textarea value={form.description} onChange={(event) => updateField("description", event.target.value)} maxLength={8000} rows={4} />
+            </label>
+            <label>
+              Eligibility
+              <textarea value={form.eligibility} onChange={(event) => updateField("eligibility", event.target.value)} maxLength={4000} rows={3} />
             </label>
   
             <label>
