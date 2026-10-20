@@ -5,6 +5,7 @@ import "./App.css";
 
 const API_URL = "https://hackmate-uzrm.onrender.com/api/hackathons";
 const ADMIN_URL = "https://hackmate-uzrm.onrender.com/api/admin/discovery";
+const PUBLIC_REFRESH_URL = "https://hackmate-uzrm.onrender.com/api/discovery/refresh";
 
 const SKILLS = [
   "Python", "Java", "C / C++", "Web Development", "AI / Machine Learning",
@@ -286,6 +287,9 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshLoading, setRefreshLoading] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState("");
+  const [refreshError, setRefreshError] = useState("");
   const [search, setSearch] = useState("");
   const searchInputRef = useRef(null);
   const [category, setCategory] = useState("All");
@@ -540,6 +544,32 @@ export default function App() {
     setProfile(draftProfile);
     setRecommendationsReady(true);
     setShowProfile(false);
+  }
+
+async function refreshDiscoveries() {
+    setRefreshLoading(true);
+    setRefreshMessage("");
+    setRefreshError("");
+    try {
+      const scanResponse = await fetch(PUBLIC_REFRESH_URL, { method: "POST" });
+      const scanData = await scanResponse.json().catch(() => ({}));
+      if (!scanResponse.ok) throw new Error(scanData.detail || `HTTP ${scanResponse.status}`);
+
+      const eventsResponse = await fetch(`${API_URL}?refresh=${Date.now()}`, { cache: "no-store" });
+      if (!eventsResponse.ok) throw new Error(`Listings reload failed: HTTP ${eventsResponse.status}`);
+      const latest = await eventsResponse.json();
+      if (!Array.isArray(latest)) throw new Error("Unexpected listings response");
+      setEvents(latest.map(normalize));
+      setRefreshMessage(
+        scanData.published_now
+          ? `Found ${scanData.published_now} new hackathon(s). Your saved collection now has ${latest.length} listings.`
+          : `Refresh complete. No new listings this time; your ${latest.length} saved listings are still here.`
+      );
+    } catch (err) {
+      setRefreshError(err.message || "Could not refresh hackathons.");
+    } finally {
+      setRefreshLoading(false);
+    }
   }
 
 async function scanEvents() {
@@ -900,7 +930,13 @@ const tabs = ["Discover", "Saved", "My List"];
                 </h2>
                 <p>Search events and manage your opportunities.</p>
               </div>
+              <button type="button" className="refresh-hackathons-button" onClick={refreshDiscoveries} disabled={refreshLoading || loading}>
+                <span aria-hidden="true">{refreshLoading ? "◌" : "↻"}</span>
+                {refreshLoading ? "Searching for new events…" : "Refresh hackathons"}
+              </button>
             </div>
+            {refreshMessage && <p className="refresh-feedback" role="status">{refreshMessage}</p>}
+            {refreshError && <p className="refresh-feedback refresh-feedback-error" role="alert">{refreshError}</p>}
 
             <label className="search-box" htmlFor="hackathon-search">
               <span aria-hidden="true">⌕</span>
