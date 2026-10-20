@@ -328,7 +328,7 @@ export default function App() {
     setAdminError("");
     try {
       const response = await fetch(
-        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(reviewFilter)}`,
+        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(reviewFilter)}&limit=100`,
         { headers: adminHeaders() }
       );
       const data = await response.json().catch(() => ({}));
@@ -545,7 +545,7 @@ export default function App() {
     setAdminError("");
     try {
       const response = await fetch(
-        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(status)}`,
+        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(status)}&limit=100`,
         { headers: adminHeaders() }
       );
       const data = await response.json();
