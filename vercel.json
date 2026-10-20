@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/admin-portal", "destination": "/index.html" },
+    { "source": "/admin-portal/:path*", "destination": "/index.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
