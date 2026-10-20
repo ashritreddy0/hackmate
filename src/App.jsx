@@ -548,7 +548,7 @@ export default function App() {
     setShowProfile(false);
   }
 
-remove loadQueue  async function scanEvents() {
+async function scanEvents() {
     setAdminLoading(true);
     setAdminError("");
     setAdminMessage("");
@@ -570,7 +570,7 @@ remove loadQueue  async function scanEvents() {
     }
   }
 
-remove manual review logic  const tabs = ["Discover", "Saved", "My List"];
+const tabs = ["Discover", "Saved", "My List"];
 
   useEffect(() => {
     const handleLocationChange = () => setActiveTab(window.location.pathname === "/admin-portal" ? "Admin Discovery" : "Discover");
