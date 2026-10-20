@@ -396,15 +396,40 @@ def delete_hackathon(event_id: str, db: Session = Depends(get_db)):
 # ---------------- Discovery queue ----------------
 
 def canonical_url(value: str) -> str:
+    """Canonicalize event URLs, ignoring fragments and common tracking parameters."""
+    from urllib.parse import parse_qsl, urlencode
+
     parsed = urlparse(value.strip())
+    tracking_prefixes = ("utm_",)
+    tracking_keys = {
+        "fbclid", "gclid", "dclid", "mc_cid", "mc_eid",
+        "ref", "referrer", "source", "campaign",
+    }
+    query = [
+        (key, val)
+        for key, val in parse_qsl(parsed.query, keep_blank_values=True)
+        if key.lower() not in tracking_keys
+        and not key.lower().startswith(tracking_prefixes)
+    ]
+    host = (parsed.hostname or "").lower().removeprefix("www.")
+    port = parsed.port
+    netloc = host if not port or (parsed.scheme.lower(), port) in {("http", 80), ("https", 443)} else f"{host}:{port}"
     return urlunparse((
         parsed.scheme.lower(),
-        parsed.netloc.lower(),
+        netloc,
         parsed.path.rstrip("/") or "/",
         "",
-        parsed.query,
+        urlencode(query, doseq=True),
         "",
     ))
+
+
+def normalized_event_title(value: str) -> str:
+    """Normalize titles for cross-URL duplicate detection."""
+    import re
+
+    text = re.sub(r"[^a-z0-9]+", " ", (value or "").casefold())
+    return " ".join(text.split())
 
 
 def is_public_http_url(value: str) -> bool:
@@ -457,8 +482,10 @@ async def extract_candidate(source_url: str, snippet: str) -> dict:
     }
     if host in generic_platform_hosts and (not path or path in {"hackathons", "events", "competitions"}):
         raise HTTPException(422, "This is a general platform or directory, not one specific hackathon. Reject it and scan for individual event pages.")
-    if len(title) < 4:
-        raise HTTPException(422, "The page did not provide a usable hackathon title. It remains pending; reject this result or verify the event page manually.")
+    if data.get("is_hackathon") is not True:
+        raise HTTPException(422, "The source page was not positively identified as a specific hackathon or buildathon.")
+    if len(title) < 4 or title.casefold() in {"hackathon", "hackathons", "home", "events", "competitions", "news"}:
+        raise HTTPException(422, "The page did not provide a usable, specific hackathon title.")
 
     def text_field(key, fallback, limit=2000):
         value = data.get(key)
@@ -575,6 +602,11 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
         if url
     }
     existing_event_ids = {event.event_id for event in existing_events}
+    existing_titles = {
+        normalized_event_title(event.title)
+        for event in existing_events
+        if event.title
+    }
 
     for item in result.get("candidates", []):
         source_url = str(item.get("source_url") or "").strip()
@@ -584,36 +616,27 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
             continue
 
         normalized = canonical_url(source_url)
-        if normalized in existing_event_urls:
+        title_key = normalized_event_title(search_title)
+        if normalized in existing_event_urls or title_key in existing_titles:
             duplicates += 1
             continue
 
         try:
             details = await extract_candidate(source_url, snippet)
         except Exception as exc:
-            # Search results have already passed AI screening. Keep useful leads
-            # visible even if an event page blocks automated extraction.
+            # Do not turn an inaccessible page, HTTPException, or AI failure into
+            # a public event record. Keep the database limited to extracted events.
             failed_imports += 1
-            details = {
-                "title": search_title[:250],
-                "organizer": "Needs verification",
-                "format": "Unknown",
-                "location": "Unknown",
-                "category": "General",
-                "level": "All levels",
-                "eligibility": "Check the official rules",
-                "description": (
-                    f"{snippet}\n\nDetails could not be extracted automatically "
-                    f"({type(exc).__name__}). Please check the official source."
-                )[:8000],
-                "platform": urlparse(source_url).hostname or "Unknown",
-                "event_url": source_url,
-                "platform_url": source_url,
-                "registration_url": None,
-                "deadline": None,
-                "event_start": None,
-                "event_end": None,
-            }
+            print(
+                "HackMate rejected discovery candidate after source validation: "
+                f"{type(exc).__name__}"
+            )
+            continue
+
+        extracted_title_key = normalized_event_title(details.get("title", ""))
+        if not extracted_title_key or extracted_title_key in existing_titles:
+            duplicates += 1
+            continue
 
         event_id = "discovery-" + hashlib.sha256(
             normalized.encode("utf-8")
@@ -643,6 +666,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
             continue
 
         existing_event_ids.add(event_id)
+        existing_titles.add(extracted_title_key)
         for url in (event.event_url, event.registration_url, event.platform_url):
             if url:
                 existing_event_urls.add(canonical_url(url))
@@ -650,7 +674,7 @@ async def scan_for_hackathons(db: Session = Depends(get_db)):
         published.append({"title": event.title, "status": event.status})
 
     return {
-        "message": "Discovery completed. AI-screened hackathons are published automatically; details are marked for verification so you can edit mistakes later.",
+        "message": "Discovery completed. Only candidates whose source pages were successfully read and positively classified as specific hackathon events were saved; details remain unverified until reviewed.",
         "searched_on": result.get("searched_on"),
         "queries_run": result.get("search_queries", 0),
         "search_failures": result.get("failed_queries", 0),
