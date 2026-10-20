@@ -194,6 +194,7 @@ function matchScore(event, profile) {
 }
 
 export default function App() {
+  const [signalSeed, setSignalSeed] = useState(0);
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem("hackmate-theme");
@@ -663,7 +664,38 @@ export default function App() {
             </div>
           </section>
 
-          {error && <div className="expiry-notice" role="alert">{error}</div>}
+          <section className="hackmate-signal" aria-label="HackMate live opportunity radar">
+            <div className="signal-topbar">
+              <span className="signal-window"><i></i><i></i><i></i></span>
+              <span>[ HACKMATE // OPPORTUNITY RADAR ]</span>
+              <span className="signal-live"><b></b> LIVE-ish</span>
+            </div>
+            <div className="signal-content">
+              <div className="signal-copy">
+                <span className="eyebrow">SIGNAL DETECTED · BUILD SOMETHING COOL</span>
+                <h2>Your next side quest<br />is <em>somewhere in here.</em></h2>
+                <p>Hackathons: because “I have an idea” deserves a better ending than another 47 open tabs.</p>
+                <button type="button" className="signal-button" onClick={() => setSignalSeed((seed) => seed + 1)}>
+                  Shuffle the chaos <span>↻</span>
+                </button>
+              </div>
+              <div className="signal-visual" aria-label="Animated grid representing opportunities">
+                <div className="signal-visual-head"><span>OPPORTUNITY MATRIX</span><span>8 × 12 / {String(224 + signalSeed * 7).padStart(3, "0")} NODES</span></div>
+                <div className="signal-grid" key={signalSeed}>
+                  {Array.from({ length: 96 }, (_, index) => {
+                    const active = ((index * 17 + signalSeed * 13) % 19 === 0) ||
+                      ((index * 7 + signalSeed * 5) % 31 === 0);
+                    const waiting = ((index * 11 + signalSeed * 3) % 13 === 0);
+                    return <span key={index} className={active ? "signal-node active" : waiting ? "signal-node waiting" : "signal-node"} />;
+                  })}
+                </div>
+                <div className="signal-legend"><span>□ scouting</span><span>■ found a lead</span><span>▧ probably a form</span></div>
+              </div>
+            </div>
+            <div className="signal-footer"><span>STATUS: YOUR POTENTIAL IS BUFFERING</span><span>TIP: SHIP FIRST. PANIC LATER.</span></div>
+          </section>
+
+          {error && <div className="expiry-notice" role="alert">{error}</div>
           {loading && <p role="status">Loading hackathons from your database…</p>}
 
           {activeTab === "Discover" && (
