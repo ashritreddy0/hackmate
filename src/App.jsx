@@ -731,7 +731,9 @@ export default function App() {
                   role="application" tabIndex={0}
                   onKeyDown={(event) => { if (event.key === "ArrowLeft") setOrbitAngle((angle) => angle - 12); if (event.key === "ArrowRight") setOrbitAngle((angle) => angle + 12); if (event.key === "ArrowUp") setOrbitTilt((tilt) => Math.max(-75, tilt - 8)); if (event.key === "ArrowDown") setOrbitTilt((tilt) => Math.min(75, tilt + 8)); if (event.key === "Home") { setOrbitAngle(0); setOrbitTilt(0); setOrbitScale(1); } }}
                   style={{ "--orbit-angle": `${orbitAngle}deg`, "--orbit-tilt": `${orbitTilt}deg`, "--orbit-scale": orbitScale }}>
-                  <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+                  <div className="orbit-auto-spin">
+                    <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+                  </div>
                   <div className="art-core"><span>{mindsets[signalSeed].icon}</span></div>
                   <div className="orbit-hint">DRAG TO DEFY GRAVITY · DOUBLE-CLICK TO RESET</div>
                 </div>
