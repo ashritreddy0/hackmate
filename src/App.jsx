@@ -314,6 +314,35 @@ export default function App() {
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminMessage, setAdminMessage] = useState("");
   const [adminError, setAdminError] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+
+  function adminHeaders() {
+    return { Authorization: `Basic ${btoa(`${adminUsername}:${adminPassword}`)}` };
+  }
+
+  async function loginAdmin(event) {
+    event.preventDefault();
+    setAdminLoading(true);
+    setAdminError("");
+    try {
+      const response = await fetch(
+        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(reviewFilter)}`,
+        { headers: adminHeaders() }
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
+      setQueue(Array.isArray(data) ? data : []);
+      setAdminAuthenticated(true);
+      setAdminMessage("Admin login successful.");
+    } catch (err) {
+      setAdminAuthenticated(false);
+      setAdminError(err.message);
+    } finally {
+      setAdminLoading(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -533,7 +562,7 @@ export default function App() {
     setAdminError("");
     setAdminMessage("");
     try {
-      const response = await fetch(`${ADMIN_URL}/scan`, { method: "POST" });
+      const response = await fetch(`${ADMIN_URL}/scan`, { method: "POST", headers: adminHeaders() });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
       setAdminMessage(data.message || "Scan completed.");
@@ -578,7 +607,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (activeTab === "Admin Discovery") loadQueue(reviewFilter);
+    if (activeTab === "Admin Discovery" && adminAuthenticated) loadQueue(reviewFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, reviewFilter]);
 
@@ -630,6 +659,20 @@ export default function App() {
           <h1>Hackathon Discovery Queue</h1>
           <p>Review potential events before adding them to HackMate.</p>
 
+          {!adminAuthenticated ? (
+            <form onSubmit={loginAdmin} style={{ maxWidth: 420, display: "grid", gap: 12, margin: "24px 0" }}>
+              <label>Admin username
+                <input autoComplete="username" value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} required />
+              </label>
+              <label>Admin password
+                <input type="password" autoComplete="current-password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} required />
+              </label>
+              <button className="primary-button" type="submit" disabled={adminLoading}>{adminLoading ? "Checking…" : "Log in"}</button>
+              {adminError && <p role="alert" style={{ color: "#b42318" }}>{adminError}</p>}
+            </form>
+          ) : (
+          <>
+          <button type="button" onClick={() => { setAdminAuthenticated(false); setAdminPassword(""); setAdminMessage(""); setQueue([]); }}>Log out</button>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "22px 0" }}>
             <button className="primary-button" onClick={scanEvents} disabled={adminLoading}>
               {adminLoading ? "Working…" : "🔎 Scan for hackathons"}
@@ -672,9 +715,10 @@ export default function App() {
 
           {!adminLoading && queue.length === 0 && <p>No candidates in this queue yet.</p>}
           <p style={{ fontSize: 12, color: "#667085" }}>
-            Verify event dates, registration links and eligibility before marking an event open.
-            This prototype admin page is not protected by login.
+            Search results are leads, not a guarantee of every event in India. Verify dates, registration links and eligibility before publishing.
           </p>
+          </>
+          )}
         </main>
       ) : (
         <main>
