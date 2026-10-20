@@ -13,7 +13,7 @@ const EVENT_STATUSES = [
 function formatDate(value) {
   if (!value) return "Not confirmed";
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? `${value}T00:00:00` : value);
   if (Number.isNaN(date.getTime())) return "Not confirmed";
 
   return date.toLocaleDateString("en-IN", {
@@ -69,7 +69,9 @@ function HackathonCard({
   const source = getSourceInfo(hackathon);
 
   const deadline = hackathon.deadline
-    ? new Date(`${hackathon.deadline}T23:59:59`)
+    ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(hackathon.deadline))
+      ? `${hackathon.deadline}T23:59:59`
+      : hackathon.deadline)
     : null;
 
   const isExpired =
@@ -291,7 +293,7 @@ function HackathonCard({
         {editing && (
           <form className="event-edit-form" onSubmit={saveEdits}>
             <h4>Edit event details</h4>
-            <p>Changes are saved in this browser and do not update the organizer's website.</p>
+            <p>Changes update HackMate's record when the backend accepts them; they do not change the organizer's website.</p>
   
             <label>
               Organizer
