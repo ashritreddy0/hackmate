@@ -195,6 +195,13 @@ function matchScore(event, profile) {
 
 export default function App() {
   const [signalSeed, setSignalSeed] = useState(0);
+  const mindsets = [
+    { tag: "THE 2 AM VISIONARY", title: "One tiny idea.\\nUnreasonable confidence.", line: "You don’t need the perfect idea. You need a deadline and a teammate who says “wait, that might actually work.”", prompt: "Find a team. Make the weird thing." },
+    { tag: "THE TAB COLLECTOR", title: "Research is great.\\nBuilding is better.", line: "Your 38th open tab is not going to write the first line of code. Close three. Keep the useful one.", prompt: "Turn one saved link into a prototype." },
+    { tag: "THE QUIET COOKER", title: "Low noise.\\nHigh shipping energy.", line: "You don’t have to be the loudest person in the room. Let the demo do the talking.", prompt: "Pick a problem. Ship a small fix." },
+    { tag: "THE HAPPY ACCIDENT", title: "Wrong turn.\\nInteresting destination.", line: "Some of the best projects start with “that probably won’t work.” Curiosity is a valid roadmap.", prompt: "Explore one idea outside your comfort zone." },
+    { tag: "THE DEADLINE ATHLETE", title: "Powered by snacks\\nand mild panic.", line: "A little pressure can get you moving. A clear next step gets you over the finish line.", prompt: "Find a hackathon with a real deadline." },
+  ];
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem("hackmate-theme");
@@ -202,6 +209,11 @@ export default function App() {
     } catch {}
     return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setSignalSeed((seed) => (seed + 1) % 5), 6500);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -664,35 +676,28 @@ export default function App() {
             </div>
           </section>
 
-          <section className="hackmate-signal" aria-label="HackMate live opportunity radar">
-            <div className="signal-topbar">
-              <span className="signal-window"><i></i><i></i><i></i></span>
-              <span>[ HACKMATE // OPPORTUNITY RADAR ]</span>
-              <span className="signal-live"><b></b> LIVE-ish</span>
+          <section className="hackmate-signal" aria-label="HackMate rotating builder mindset">
+            <div className="mindset-topbar">
+              <span><i className="mindset-status-dot" /> HACKMATE FIELD NOTES</span>
+              <span>NO GURUS. JUST BUILDING.</span>
             </div>
-            <div className="signal-content">
-              <div className="signal-copy">
-                <span className="eyebrow">SIGNAL DETECTED · BUILD SOMETHING COOL</span>
-                <h2>Your next side quest<br />is <em>somewhere in here.</em></h2>
-                <p>Hackathons: because “I have an idea” deserves a better ending than another 47 open tabs.</p>
-                <button type="button" className="signal-button" onClick={() => setSignalSeed((seed) => seed + 1)}>
-                  Shuffle the chaos <span>↻</span>
-                </button>
+            <div className="mindset-content" aria-live="polite">
+              <div className="mindset-index"><span>YOUR CURRENT BUILDING ARC</span><span>0{signalSeed + 1} / 05</span></div>
+              <div className="mindset-main" key={signalSeed}>
+                <span className="mindset-tag">{mindsets[signalSeed].tag}</span>
+                <h2>{mindsets[signalSeed].title.split("\\n").map((part, index) => <span key={part}>{index > 0 && <br />}{part}</span>)}</h2>
+                <p>{mindsets[signalSeed].line}</p>
+                <div className="mindset-prompt"><span>YOUR SIDE QUEST</span><strong>{mindsets[signalSeed].prompt}</strong></div>
               </div>
-              <div className="signal-visual" aria-label="Animated grid representing opportunities">
-                <div className="signal-visual-head"><span>OPPORTUNITY MATRIX</span><span>8 × 12 / {String(224 + signalSeed * 7).padStart(3, "0")} NODES</span></div>
-                <div className="signal-grid" key={signalSeed}>
-                  {Array.from({ length: 96 }, (_, index) => {
-                    const active = ((index * 17 + signalSeed * 13) % 19 === 0) ||
-                      ((index * 7 + signalSeed * 5) % 31 === 0);
-                    const waiting = ((index * 11 + signalSeed * 3) % 13 === 0);
-                    return <span key={index} className={active ? "signal-node active" : waiting ? "signal-node waiting" : "signal-node"} />;
-                  })}
-                </div>
-                <div className="signal-legend"><span>□ scouting</span><span>■ found a lead</span><span>▧ probably a form</span></div>
+              <div className="mindset-art" aria-hidden="true">
+                <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+                <div className="art-core"><span>{["✳", "⌘", "↗", "◌", "⚡"][signalSeed]}</span></div>
+                <div className="art-label art-label-top">IDEA → PROTOTYPE</div>
+                <div className="art-label art-label-bottom">PROCRASTINATION.exe <b>STOPPED</b></div>
+                <div className="art-spark spark-one" /><div className="art-spark spark-two" /><div className="art-spark spark-three" />
               </div>
             </div>
-            <div className="signal-footer"><span>STATUS: YOUR POTENTIAL IS BUFFERING</span><span>TIP: SHIP FIRST. PANIC LATER.</span></div>
+            <div className="mindset-footer"><span>REMINDER: YOU’RE ALLOWED TO BE A BEGINNER.</span><button type="button" onClick={() => setSignalSeed((seed) => (seed + 1) % 5)}>Next brain cell <span>↗</span></button></div>
           </section>
 
           {error && <div className="expiry-notice" role="alert">{error}</div>}
