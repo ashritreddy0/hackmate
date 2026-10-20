@@ -203,172 +203,180 @@ function HackathonCard({
         </div>
       </div>
 
-      <section className="event-status-panel">
-        <div className="event-status-heading">
-          <span className="detail-label">Registration status</span>
-          <span className={`event-status-pill ${statusClass}`}>{status}</span>
-        </div>
-
-        <label
-          className="event-status-select-label"
-          htmlFor={`status-${hackathon.id}`}
-        >
-          Update status
-        </label>
-
-        <select
-          id={`status-${hackathon.id}`}
-          className="event-status-select"
-          value={status}
-          onChange={(event) =>
-            onStatusChange(hackathon.id, event.target.value)
-          }
-        >
-          {EVENT_STATUSES.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          className="status-help-button"
-          onClick={() => setShowStatusHelp((value) => !value)}
-        >
-          {showStatusHelp
-            ? "Hide status guide"
-            : "What do these statuses mean?"}
-        </button>
-
-        {showStatusHelp && (
-          <p className="status-help-text">
-            Open means you believe registration is open. Needs verification
-            means you should check the event page. Closed means registration
-            is closed. Cancelled means you believe the event was cancelled.
-            These are your notes, not live checks.
-          </p>
-        )}
-      </section>
-
-      <div
-        className={`source-check-panel ${
-          source.needsRecheck ? "source-check-stale" : ""
-        }`}
-      >
-        <strong>
-          {source.needsRecheck
-            ? "⚠ Recheck this listing"
-            : "Source check recorded"}
-        </strong>
-        <div>Source: {source.label}</div>
-        <div>
-          Last checked: {formatDate(hackathon.verifiedOn)}
-          {source.age !== null && ` (${Math.max(0, source.age)} days ago)`}
-        </div>
-        <div>
-          {source.needsRecheck
-            ? "The check date is missing or older than 7 days. Confirm the event details."
-            : "A recorded check does not guarantee that details are still current."}
-        </div>
-      </div>
-
-      <div className="event-edit-actions">
-        <button
-          type="button"
-          className="edit-event-button"
-          onClick={startEditing}
-        >
-          ✎ Edit event details
-        </button>
-      </div>
-
-      {editing && (
-        <form className="event-edit-form" onSubmit={saveEdits}>
-          <h4>Edit event details</h4>
-          <p>Changes are saved in this browser and do not update the organizer's website.</p>
-
-          <label>
-            Organizer
-            <input
-              value={form.organizer}
-              onChange={(event) => updateField("organizer", event.target.value)}
-              maxLength={120}
-            />
+      <details className="card-management">
+        <summary>
+          <span>Event details &amp; management</span>
+          <span className="management-summary-hint">Status, source and edits <span aria-hidden="true">＋</span></span>
+        </summary>
+        <section className="event-status-panel">
+          <div className="event-status-heading">
+            <span className="detail-label">Registration status</span>
+            <span className={`event-status-pill ${statusClass}`}>{status}</span>
+          </div>
+  
+          <label
+            className="event-status-select-label"
+            htmlFor={`status-${hackathon.id}`}
+          >
+            Update status
           </label>
-
-          <label>
-            Registration deadline
-            <input
-              type="date"
-              value={form.deadline}
-              onChange={(event) => updateField("deadline", event.target.value)}
-            />
-          </label>
-
-          <label>
-            Event start date
-            <input
-              type="date"
-              value={form.eventStart}
-              onChange={(event) => updateField("eventStart", event.target.value)}
-            />
-          </label>
-
-          <label>
-            Event end date
-            <input
-              type="date"
-              value={form.eventEnd}
-              onChange={(event) => updateField("eventEnd", event.target.value)}
-            />
-          </label>
-
-          <label>
-            Registration URL
-            <input
-              type="url"
-              placeholder="https://..."
-              value={form.registrationUrl}
-              onChange={(event) =>
-                updateField("registrationUrl", event.target.value)
-              }
-            />
-          </label>
-
-          <label>
-            Event page URL
-            <input
-              type="url"
-              placeholder="https://..."
-              value={form.eventUrl}
-              onChange={(event) => updateField("eventUrl", event.target.value)}
-            />
-          </label>
-
-          {formError && (
-            <p className="event-edit-error" role="alert">
-              {formError}
+  
+          <select
+            id={`status-${hackathon.id}`}
+            className="event-status-select"
+            value={status}
+            onChange={(event) =>
+              onStatusChange(hackathon.id, event.target.value)
+            }
+          >
+            {EVENT_STATUSES.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+  
+          <button
+            type="button"
+            className="status-help-button"
+            onClick={() => setShowStatusHelp((value) => !value)}
+          >
+            {showStatusHelp
+              ? "Hide status guide"
+              : "What do these statuses mean?"}
+          </button>
+  
+          {showStatusHelp && (
+            <p className="status-help-text">
+              Open means you believe registration is open. Needs verification
+              means you should check the event page. Closed means registration
+              is closed. Cancelled means you believe the event was cancelled.
+              These are your notes, not live checks.
             </p>
           )}
-
-          <div className="event-edit-form-actions">
-            <button type="submit" className="edit-save-button">
-              Save changes
-            </button>
-            <button
-              type="button"
-              className="edit-cancel-button"
-              onClick={() => {
-                setEditing(false);
-                setFormError("");
-              }}
-            >
-              Cancel
-            </button>
+        </section>
+  
+        <div
+          className={`source-check-panel ${
+            source.needsRecheck ? "source-check-stale" : ""
+          }`}
+        >
+          <strong>
+            {source.needsRecheck
+              ? "⚠ Recheck this listing"
+              : "Source check recorded"}
+          </strong>
+          <div>Source: {source.label}</div>
+          <div>
+            Last checked: {formatDate(hackathon.verifiedOn)}
+            {source.age !== null && ` (${Math.max(0, source.age)} days ago)`}
           </div>
-        </form>
-      )}
+          <div>
+            {source.needsRecheck
+              ? "The check date is missing or older than 7 days. Confirm the event details."
+              : "A recorded check does not guarantee that details are still current."}
+          </div>
+        </div>
+  
+        <div className="event-edit-actions">
+          <button
+            type="button"
+            className="edit-event-button"
+            onClick={startEditing}
+          >
+            ✎ Edit event details
+          </button>
+        </div>
+  
+        {editing && (
+          <form className="event-edit-form" onSubmit={saveEdits}>
+            <h4>Edit event details</h4>
+            <p>Changes are saved in this browser and do not update the organizer's website.</p>
+  
+            <label>
+              Organizer
+              <input
+                value={form.organizer}
+                onChange={(event) => updateField("organizer", event.target.value)}
+                maxLength={120}
+              />
+            </label>
+  
+            <label>
+              Registration deadline
+              <input
+                type="date"
+                value={form.deadline}
+                onChange={(event) => updateField("deadline", event.target.value)}
+              />
+            </label>
+  
+            <label>
+              Event start date
+              <input
+                type="date"
+                value={form.eventStart}
+                onChange={(event) => updateField("eventStart", event.target.value)}
+              />
+            </label>
+  
+            <label>
+              Event end date
+              <input
+                type="date"
+                value={form.eventEnd}
+                onChange={(event) => updateField("eventEnd", event.target.value)}
+              />
+            </label>
+  
+            <label>
+              Registration URL
+              <input
+                type="url"
+                placeholder="https://..."
+                value={form.registrationUrl}
+                onChange={(event) =>
+                  updateField("registrationUrl", event.target.value)
+                }
+              />
+            </label>
+  
+            <label>
+              Event page URL
+              <input
+                type="url"
+                placeholder="https://..."
+                value={form.eventUrl}
+                onChange={(event) => updateField("eventUrl", event.target.value)}
+              />
+            </label>
+  
+            {formError && (
+              <p className="event-edit-error" role="alert">
+                {formError}
+              </p>
+            )}
+  
+            <div className="event-edit-form-actions">
+              <button type="submit" className="edit-save-button">
+                Save changes
+              </button>
+              <button
+                type="button"
+                className="edit-cancel-button"
+                onClick={() => {
+                  setEditing(false);
+                  setFormError("");
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+  
+  
+      </details>
 
       <div className="hackathon-card-actions">
         <button
