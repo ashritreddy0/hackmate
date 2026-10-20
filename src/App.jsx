@@ -195,6 +195,9 @@ function matchScore(event, profile) {
 
 export default function App() {
   const [signalSeed, setSignalSeed] = useState(0);
+  const [orbitAngle, setOrbitAngle] = useState(0);
+  const [orbitTilt, setOrbitTilt] = useState(0);
+  const [orbitScale, setOrbitScale] = useState(1);
   const mindsets = [
     { tag: "BRAIN HACK 01 · THE ZEIGARNIK EFFECT", title: "Your brain hates — an unfinished loop.", line: "A task feels less scary once it has a first step. Don’t plan the whole startup; write the one-sentence problem you want to solve.", prompt: "Take 20 seconds: describe a problem you’ve noticed.", action: "START SMALL", icon: "◔" },
     { tag: "BRAIN HACK 02 · THE CURIOSITY GAP", title: "A question beats — another tutorial.", line: "Curiosity gives you a reason to learn. Pick a problem you genuinely want answered, then let the tech stack follow.", prompt: "What annoys you enough to build a fix for it?", action: "GET CURIOUS", icon: "?" },
@@ -717,9 +720,21 @@ export default function App() {
                 <p>{mindsets[signalSeed].line}</p>
                 <div className="mindset-prompt"><span>YOUR SIDE QUEST</span><strong>{mindsets[signalSeed].prompt}</strong></div>
               </div>
-              <div className="mindset-art" aria-hidden="true">
-                <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
-                <div className="art-core"><span>{mindsets[signalSeed].icon}</span></div>
+              <div className="mindset-art" aria-label="Interactive orbit. Drag or swipe to rotate the rings in any direction; use the wheel to tilt them.">
+                <div className="orbit-playfield"
+                  onPointerDown={(event) => { if (event.button !== 0) return; event.currentTarget.setPointerCapture(event.pointerId); event.currentTarget.dataset.dragging = "true"; event.currentTarget.dataset.lastX = String(event.clientX); event.currentTarget.dataset.lastY = String(event.clientY); }}
+                  onPointerMove={(event) => { if (event.currentTarget.dataset.dragging !== "true") return; const lastX = Number(event.currentTarget.dataset.lastX || event.clientX); const lastY = Number(event.currentTarget.dataset.lastY || event.clientY); const dx = event.clientX - lastX; const dy = event.clientY - lastY; setOrbitAngle((angle) => angle + dx * 1.1 + dy * .35); setOrbitTilt((tilt) => Math.max(-75, Math.min(75, tilt + dy * .7))); event.currentTarget.dataset.lastX = String(event.clientX); event.currentTarget.dataset.lastY = String(event.clientY); }}
+                  onPointerUp={(event) => { event.currentTarget.dataset.dragging = "false"; }}
+                  onPointerCancel={(event) => { event.currentTarget.dataset.dragging = "false"; }}
+                  onWheel={(event) => { setOrbitTilt((tilt) => Math.max(-75, Math.min(75, tilt + event.deltaY * .08))); setOrbitScale((scale) => Math.max(.65, Math.min(1.55, scale - event.deltaY * .001))); }}
+                  onDoubleClick={() => { setOrbitAngle(0); setOrbitTilt(0); setOrbitScale(1); }}
+                  role="application" tabIndex={0}
+                  onKeyDown={(event) => { if (event.key === "ArrowLeft") setOrbitAngle((angle) => angle - 12); if (event.key === "ArrowRight") setOrbitAngle((angle) => angle + 12); if (event.key === "ArrowUp") setOrbitTilt((tilt) => Math.max(-75, tilt - 8)); if (event.key === "ArrowDown") setOrbitTilt((tilt) => Math.min(75, tilt + 8)); if (event.key === "Home") { setOrbitAngle(0); setOrbitTilt(0); setOrbitScale(1); } }}
+                  style={{ "--orbit-angle": `${orbitAngle}deg`, "--orbit-tilt": `${orbitTilt}deg`, "--orbit-scale": orbitScale }}>
+                  <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+                  <div className="art-core"><span>{mindsets[signalSeed].icon}</span></div>
+                  <div className="orbit-hint">DRAG TO DEFY GRAVITY · DOUBLE-CLICK TO RESET</div>
+                </div>
                 <div className="art-label art-label-top">{mindsets[signalSeed].action} → PROTOTYPE</div>
                 <div className="art-label art-label-bottom">PROCRASTINATION.exe <b>STOPPED</b></div>
                 <div className="art-spark spark-one" /><div className="art-spark spark-two" /><div className="art-spark spark-three" />
