@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import hackathons from "./assets/data/hackathons.js";
 import HackathonCard from "./components/hackathoncard.jsx";
 import "./App.css";
@@ -233,6 +233,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const searchInputRef = useRef(null);
   const [category, setCategory] = useState("All");
   const [formatFilter, setFormatFilter] = useState("All");
   const [sortBy, setSortBy] = useState("deadline");
@@ -298,6 +299,22 @@ export default function App() {
   useEffect(() => saveStorage("hackmate-event-statuses", statuses), [statuses]);
   useEffect(() => saveStorage("hackmate-event-edits", edits), [edits]);
   useEffect(() => saveStorage("hackmate-profile", profile), [profile]);
+  useEffect(() => {
+    function handleShortcut(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setActiveTab("Discover");
+        window.setTimeout(() => searchInputRef.current?.focus(), 0);
+      }
+      if (event.key === "Escape" && document.activeElement === searchInputRef.current) {
+        setSearch("");
+        searchInputRef.current?.blur();
+      }
+    }
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
+
 
   const mergedEvents = useMemo(() => {
     const byId = new Map();
@@ -599,6 +616,21 @@ export default function App() {
               }}>
                 Find my matches <span>→</span>
               </button>
+            </div>
+          </section>
+
+          <section className="value-strip" aria-label="Why use HackMate">
+            <div className="value-strip-stat">
+              <span className="value-strip-icon">✦</span>
+              <div><strong>{mergedEvents.length}</strong><span>opportunities to explore</span></div>
+            </div>
+            <div className="value-strip-stat">
+              <span className="value-strip-icon">⌕</span>
+              <div><strong>One search</strong><span>multiple event platforms</span></div>
+            </div>
+            <div className="value-strip-stat">
+              <span className="value-strip-icon">↗</span>
+              <div><strong>Your next step</strong><span>save, track and compare</span></div>
             </div>
           </section>
 
