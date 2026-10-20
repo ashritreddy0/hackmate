@@ -1,6 +1,5 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import hackathons from "./assets/data/hackathons.js";
 import HackathonCard from "./components/hackathoncard.jsx";
 import "./App.css";
 
@@ -284,7 +283,7 @@ export default function App() {
   }, [cursorMode]);
 
   const [activeTab, setActiveTab] = useState(() => window.location.pathname === "/admin-portal" ? "Admin Discovery" : "Discover");
-  const [events, setEvents] = useState(hackathons.map(normalize));
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
