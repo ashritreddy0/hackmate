@@ -545,7 +545,8 @@ export default function App() {
     setAdminError("");
     try {
       const response = await fetch(
-        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(status)}`
+        `${ADMIN_URL}/queue?review_status=${encodeURIComponent(status)}`,
+        { headers: adminHeaders() }
       );
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
@@ -582,7 +583,7 @@ export default function App() {
     try {
       const response = await fetch(
         `${ADMIN_URL}/${encodeURIComponent(id)}/${action}`,
-        { method: "POST" }
+        { method: "POST", headers: adminHeaders() }
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
