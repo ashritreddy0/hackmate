@@ -132,6 +132,23 @@ def is_relevant_domain(url: str) -> bool:
     return "." in host
 
 
+def is_generic_platform_page(url: str) -> bool:
+    """Exclude platform homepages and broad directories from event candidates."""
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().removeprefix("www.")
+    path = parsed.path.strip("/").lower()
+    generic_paths = {
+        "mlh.io": {"", "events", "hackathons", "programs"},
+        "devpost.com": {"", "hackathons"},
+        "unstop.com": {"", "competitions", "hackathons"},
+        "devfolio.co": {"", "hackathons"},
+        "hackerearth.com": {"", "challenges"},
+        "hack2skill.com": {""},
+        "hackathon.com": {"", "events"},
+    }
+    return host in generic_paths and path in generic_paths[host]
+
+
 def looks_like_hackathon(title: str, url: str, snippet: str) -> bool:
     text = f"{title} {url} {snippet}".lower()
 
@@ -209,7 +226,7 @@ async def search_one_query(
             title = link.get_text(" ", strip=True)
             url = clean_url(link.get("href", ""))
             snippet = snippet_node.get_text(" ", strip=True) if snippet_node else ""
-            if url and is_relevant_domain(url) and looks_like_hackathon(title, url, snippet):
+            if url and is_relevant_domain(url) and not is_generic_platform_page(url) and looks_like_hackathon(title, url, snippet):
                 results.append({
                     "title": title, "source_url": url, "snippet": snippet,
                     "source_domain": urlparse(url).hostname,
