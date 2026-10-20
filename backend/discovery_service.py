@@ -335,10 +335,29 @@ async def ai_filter_candidates(candidates: list[dict]) -> tuple[list[dict], int]
                 else:
                     rejected += 1
         except Exception as exc:
-            # Fail closed: never send unscreened search results into the queue.
-            raise RuntimeError(
-                f"AI screening failed; no unscreened candidates were queued ({type(exc).__name__})."
-            ) from exc
+            # Discovery must not go completely blank when Gemini is temporarily
+            # unavailable, misconfigured, or rate-limited. Keep only conservative
+            # keyword-matched event leads and clearly mark every one for review.
+            # The public feed must never claim these leads are verified.
+            print(
+                "HackMate AI screening unavailable; using conservative "
+                f"keyword screening ({type(exc).__name__})."
+            )
+            fallback = []
+            for candidate in candidates:
+                title = candidate.get("title", "")
+                url = candidate.get("source_url", "")
+                snippet = candidate.get("snippet", "")
+                if (
+                    looks_like_hackathon(title, url, snippet)
+                    and not is_generic_platform_page(url)
+                    and not looks_expired(title, snippet)
+                ):
+                    candidate["ai_screening"] = "Needs manual verification (AI unavailable)"
+                    candidate["status"] = "Needs verification"
+                    candidate["review_required"] = True
+                    fallback.append(candidate)
+            return fallback, 0
 
     return accepted, rejected
 
@@ -433,6 +452,6 @@ async def discover_candidates() -> dict:
         "candidate_count": len(candidates),
         "failed_queries": failed_queries,
         "review_required": False,
-        "screening_mode": "Gemini AI screening when GEMINI_API_KEY is configured",
+        "screening_mode": "Gemini AI screening with conservative fallback when unavailable",
         "candidates": candidates,
     }
