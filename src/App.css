@@ -1839,3 +1839,73 @@ html, body { background: #f1f1f4 !important; }
 @media (prefers-reduced-motion: reduce) {
   .mindset-main, .art-orbit, .art-spark { animation: none !important; }
 }
+
+
+/* User-controlled cursor ambience */
+.app-shell::before {
+  background:
+    radial-gradient(300px circle at var(--cursor-x, -200px) var(--cursor-y, -200px), rgba(112,87,255,.15), rgba(78,140,255,.075) 38%, transparent 72%),
+    radial-gradient(200px circle at calc(var(--cursor-x, -200px) + 28px) calc(var(--cursor-y, -200px) + 22px), rgba(200,255,67,.11), transparent 72%);
+}
+:root[data-cursor-mode="off"] .app-shell::before { opacity: 0 !important; display: none !important; }
+:root[data-cursor-mode="interactive"] .app-shell::before {
+  background:
+    radial-gradient(260px circle at var(--cursor-x, -200px) var(--cursor-y, -200px), rgba(112,87,255,.18), transparent 68%),
+    radial-gradient(3px 3px at calc(var(--cursor-x, -200px) - 38px) calc(var(--cursor-y, -200px) - 22px), rgba(112,87,255,.8) 98%, transparent),
+    radial-gradient(2px 2px at calc(var(--cursor-x, -200px) + 42px) calc(var(--cursor-y, -200px) - 34px), rgba(78,140,255,.9) 98%, transparent),
+    radial-gradient(3px 3px at calc(var(--cursor-x, -200px) + 30px) calc(var(--cursor-y, -200px) + 37px), rgba(200,255,67,.95) 98%, transparent),
+    radial-gradient(2px 2px at calc(var(--cursor-x, -200px) - 22px) calc(var(--cursor-y, -200px) + 46px), rgba(112,87,255,.8) 98%, transparent);
+}
+.app-shell::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+  left: var(--ripple-x, -100px);
+  top: var(--ripple-y, -100px);
+  border: 1px solid rgba(112,87,255,.65);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.1);
+}
+:root[data-cursor-mode="interactive"][data-ripple="true"] .app-shell::after {
+  animation: cursorRipple 650ms ease-out both;
+}
+@keyframes cursorRipple {
+  0% { opacity: .75; transform: translate(-50%,-50%) scale(.1); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(9); }
+}
+.cursor-mode-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 9px;
+  border: 1px solid #dedbe7;
+  border-radius: 12px;
+  color: #7057ff;
+  background: rgba(255,255,255,.7);
+}
+.cursor-mode-control > span { font-size: 16px; }
+.cursor-mode-control select {
+  max-width: 105px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #393447;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+:root[data-theme="dark"] .cursor-mode-control { background: #211e34; border-color: #4b426f; }
+:root[data-theme="dark"] .cursor-mode-control select { color: #e7e1ff; }
+@media (max-width: 760px) {
+  .cursor-mode-control { min-height: 36px; padding: 0 7px; gap: 4px; }
+  .cursor-mode-control select { max-width: 82px; font-size: .75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before, .app-shell::after { display: none !important; }
+}
