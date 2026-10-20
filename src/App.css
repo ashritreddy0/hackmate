@@ -1160,10 +1160,11 @@ body { color: var(--hm-ink); }
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(280px circle at var(--cursor-x) var(--cursor-y), rgba(112, 87, 255, .13), transparent 72%),
-    radial-gradient(170px circle at calc(var(--cursor-x) + 34px) calc(var(--cursor-y) + 25px), rgba(200, 255, 67, .12), transparent 74%);
+    radial-gradient(240px circle at var(--cursor-x) var(--cursor-y), rgba(36, 22, 91, .28) 0%, rgba(72, 48, 160, .22) 24%, rgba(112, 87, 255, .16) 48%, transparent 76%),
+    radial-gradient(165px circle at calc(var(--cursor-x) + 28px) calc(var(--cursor-y) + 22px), rgba(200, 255, 67, .19) 0%, rgba(200, 255, 67, .08) 43%, transparent 75%);
   opacity: 0;
-  transition: opacity 260ms ease;
+  transition: opacity 180ms ease;
+  will-change: background;
 }
 .app-shell > * { position: relative; z-index: 1; }
 :root[data-cursor-visible="true"] .app-shell::before { opacity: 1; }
@@ -1352,5 +1353,17 @@ body::after { display: none !important; }
   .hero-content h1 { letter-spacing: -2.7px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .app-shell::before { display: none !important; }
+}
+
+
+/* Make the Warp-style cursor spotlight noticeably deeper while preserving the white canvas. */
+.app-shell::before {
+  background:
+    radial-gradient(260px circle at var(--cursor-x) var(--cursor-y), rgba(26, 17, 67, .32) 0%, rgba(59, 37, 133, .26) 23%, rgba(112, 87, 255, .17) 49%, transparent 77%),
+    radial-gradient(180px circle at calc(var(--cursor-x) + 30px) calc(var(--cursor-y) + 24px), rgba(200, 255, 67, .21) 0%, rgba(200, 255, 67, .09) 43%, transparent 76%);
+}
+:root[data-cursor-visible="true"] .app-shell::before { opacity: 1; }
+@media (max-width: 800px), (prefers-reduced-motion: reduce) {
   .app-shell::before { display: none !important; }
 }
