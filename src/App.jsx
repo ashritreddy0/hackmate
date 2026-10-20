@@ -206,14 +206,12 @@ export default function App() {
       frame = requestAnimationFrame(() => {
         root.style.setProperty("--cursor-x", `${event.clientX}px`);
         root.style.setProperty("--cursor-y", `${event.clientY}px`);
-        const interactive = event.target instanceof Element && event.target.closest("a, button, input, select, textarea, [role=button]");
-        root.dataset.cursorHover = interactive ? "true" : "false";
+        root.dataset.cursorVisible = "true";
       });
     };
     const onPointerLeave = () => { root.dataset.cursorVisible = "false"; };
     const onPointerEnter = () => { root.dataset.cursorVisible = "true"; };
 
-    root.dataset.cursorVisible = "true";
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     document.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("pointerenter", onPointerEnter);
@@ -223,7 +221,6 @@ export default function App() {
       document.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("pointerenter", onPointerEnter);
       delete root.dataset.cursorVisible;
-      delete root.dataset.cursorHover;
       root.style.removeProperty("--cursor-x");
       root.style.removeProperty("--cursor-y");
     };
