@@ -283,7 +283,7 @@ export default function App() {
     };
   }, [cursorMode]);
 
-  const [activeTab, setActiveTab] = useState("Discover");
+  const [activeTab, setActiveTab] = useState(() => window.location.pathname === "/admin-portal" ? "Admin Discovery" : "Discover");
   const [events, setEvents] = useState(hackathons.map(normalize));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -611,7 +611,20 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, reviewFilter]);
 
-  const tabs = ["Discover", "Saved", "My List", "Admin Discovery"];
+  const tabs = ["Discover", "Saved", "My List"];
+
+  useEffect(() => {
+    const handleLocationChange = () => setActiveTab(window.location.pathname === "/admin-portal" ? "Admin Discovery" : "Discover");
+    window.addEventListener("popstate", handleLocationChange);
+    return () => window.removeEventListener("popstate", handleLocationChange);
+  }, []);
+
+  function openPublicApp(tab = "Discover") {
+    if (window.location.pathname === "/admin-portal") {
+      window.history.pushState({}, "", "/");
+    }
+    setActiveTab(tab);
+  }
 
   return (
     <div className="app-shell">
@@ -627,7 +640,7 @@ export default function App() {
               key={tab}
               type="button"
               className={`nav-link ${activeTab === tab ? "active" : ""}`}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => openPublicApp(tab)}
             >
               {tab}
             </button>
@@ -672,7 +685,7 @@ export default function App() {
             </form>
           ) : (
           <>
-          <button type="button" onClick={() => { setAdminAuthenticated(false); setAdminPassword(""); setAdminMessage(""); setQueue([]); }}>Log out</button>
+          <button type="button" onClick={() => { setAdminAuthenticated(false); setAdminPassword(""); setAdminUsername(""); setAdminMessage(""); setQueue([]); openPublicApp("Discover"); }}>Log out</button>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "22px 0" }}>
             <button className="primary-button" onClick={scanEvents} disabled={adminLoading}>
               {adminLoading ? "Working…" : "🔎 Scan for hackathons"}
