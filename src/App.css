@@ -2034,3 +2034,40 @@ html, body { background: #f1f1f4 !important; }
   outline: 2px solid #a99aff;
   outline-offset: 3px;
 }
+
+
+/* Public discovery refresh action */
+.refresh-hackathons-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+  padding: 11px 16px;
+  border: 1px solid #dcdafa;
+  border-radius: 12px;
+  background: #fff;
+  color: #5144c8;
+  font-size: 12px;
+  font-weight: 750;
+  box-shadow: 0 7px 20px rgba(52, 48, 125, .07);
+  transition: transform 160ms ease, background 160ms ease;
+}
+.refresh-hackathons-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #f3f2ff;
+}
+.refresh-hackathons-button > span {
+  font-size: 20px;
+  line-height: 1;
+}
+.refresh-feedback {
+  margin: -10px 0 18px;
+  color: #28734b;
+  font-size: 12px;
+}
+.refresh-feedback-error { color: #b42318; }
+@media (max-width: 600px) {
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .refresh-hackathons-button { width: 100%; }
+}
