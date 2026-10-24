@@ -326,38 +326,19 @@ async def ai_filter_candidates(candidates: list[dict]) -> tuple[list[dict], int]
             for i, candidate in enumerate(batch):
                 decision = decisions.get(i)
                 if decision is None:
-                    # A malformed AI response must not silently delete leads.
-                    candidate["ai_screening"] = "Needs review (AI response incomplete)"
-                    accepted.append(candidate)
+                    # Incomplete AI output is not evidence that a result is a real event.
+                    rejected += 1
                 elif decision.get("keep") is True:
                     candidate["ai_screening"] = "AI screened: plausible event"
                     accepted.append(candidate)
                 else:
                     rejected += 1
         except Exception as exc:
-            # Discovery must not go completely blank when Gemini is temporarily
-            # unavailable, misconfigured, or rate-limited. Keep only conservative
-            # keyword-matched event leads and clearly mark every one for review.
-            # The public feed must never claim these leads are verified.
-            print(
-                "HackMate AI screening unavailable; using conservative "
-                f"keyword screening ({type(exc).__name__})."
-            )
-            fallback = []
-            for candidate in candidates:
-                title = candidate.get("title", "")
-                url = candidate.get("source_url", "")
-                snippet = candidate.get("snippet", "")
-                if (
-                    looks_like_hackathon(title, url, snippet)
-                    and not is_generic_platform_page(url)
-                    and not looks_expired(title, snippet)
-                ):
-                    candidate["ai_screening"] = "Needs manual verification (AI unavailable)"
-                    candidate["status"] = "Needs verification"
-                    candidate["review_required"] = True
-                    fallback.append(candidate)
-            return fallback, 0
+            # Never publish search-result snippets when the quality gate is down.
+            # A visible error is safer than polluting the public listing database.
+            raise RuntimeError(
+                f"AI candidate screening failed ({type(exc).__name__}); no candidates were approved."
+            ) from exc
 
     return accepted, rejected
 
